@@ -78,6 +78,8 @@ String ODriveArduino::readString() {
     unsigned long timeout_start = millis();
     for (;;) {
         while (!serial_.available()) {
+        
+            
             if (millis() - timeout_start >= timeout) {
                 return str;
             }
@@ -88,4 +90,12 @@ String ODriveArduino::readString() {
         str += c;
     }
     return str;
+
+
+}
+
+String ODriveArduino::PrintInfo(){
+    serial_ << "i\n";
+    return ODriveArduino::readString();
+
 }

@@ -30,6 +30,7 @@ public:
     void TrapezoidalMove(int motor_number, float position);
     // Getters
     float GetVelocity(int motor_number);
+    String PrintInfo();
     // General params
     float readFloat();
     int32_t readInt();
@@ -40,6 +41,7 @@ private:
     String readString();
 
     Stream& serial_;
+    
 };
 
 #endif //ODriveArduino_h
