@@ -5,6 +5,7 @@
 #include <stm32f4xx_hal.h>
 #include "fibre/protocol.hpp"
 #include "odrive_main.h"
+#include<algorithm>
 
 #define CAN_CLK_HZ (42000000)
 #define CAN_CLK_MHZ (42)
