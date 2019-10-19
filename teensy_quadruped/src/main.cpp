@@ -1,7 +1,13 @@
 #include <Arduino.h>
 #include<ODriveArduino.h>
+
 #define HWSERIAL Serial1
 bool firmware_check = false;
+
+
+//CAN from teensy to main control PC104
+
+
 
 //ODrive object
 ODriveArduino odrive(HWSERIAL);
@@ -10,7 +16,7 @@ void setup() {
   
   Serial.begin(9600);
   while(!Serial);
-  HWSERIAL.begin(500000); //ODrive baud rate is set to 500,000
+  HWSERIAL.begin(2000000); //ODrive baud rate is set to 500,000
   
   
 }
@@ -20,10 +26,13 @@ void loop() {
   char* device_info_string ;
   
    //make sure custom firmware is installed on the ODrive
+   long tic = micros();
   device_info_string = odrive.PrintInfo().c_str();
+  long toc = micros();
+  Serial.println("Out-in latency: ");
+  Serial.print(toc-tic);
   if(!firmware_check)
   {
-    
     const char *parsed_string;
     if(device_info_string[0] == 'F')
     {
@@ -39,20 +48,24 @@ void loop() {
         Serial.println("Firmware check failed");
       }
       
-      
-    }    
-
+    } 
   }
-
-
-
-  
-  
-  
-  
-
-
- 
-  
- 
 }
+
+
+
+
+       
+
+
+
+
+  
+  
+  
+  
+
+
+ 
+  
+ 
