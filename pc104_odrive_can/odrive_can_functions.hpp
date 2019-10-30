@@ -2,7 +2,46 @@
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<sys/ioctl.h>
+#include<pthread.h>
+#include<request_msg.hpp>
+#define rtr 1;
 
+#define BIT_MASK_0 0xFF;
+#define BIT_MASK_1 0xFF00;
+#define BIT_MASK_2 0xFF0000;
+#define BIT_MASK_3 0xFF000000;
+#define BIT_MASK_4 0xFF00000000;
+#define BIT_MASK_5 0xFF00000000;
+#define BIT_MASK_6 0xFF0000000000;
+#define BIT_MASK_7 0xFF000000000000;
+
+using namespace std;
+//define command ids
+
+const uint32_t odrive_heartbeat = 1;
+const uint32_t estop = 2;
+const uint32_t get_motor_error = 3;/*implemented in request_msg*/
+const uint32_t get_encoder_error = 4;/*implemented in request_msg*/
+const uint32_t set_axis_node_id = 6;
+const uint32_t set_axis_requested_state= 7;
+const uint32_t get_encoder_estimate = 9; /*implemented in request_msg*/
+const uint32_t get_encoder_counts = 10; /*implemented in request_msg*/
+const uint32_t move_to_pos = 11;
+const uint32_t set_pos_setpoint = 12;
+const uint32_t set_vel_setpoint = 13;
+const uint32_t set_cur_setpoint = 14;
+const uint32_t set_vel_limit = 15;
+const uint32_t start_anti_cogging = 16;
+const uint32_t set_traj_vel_limit = 17;
+const uint32_t set_traj_accel_limit = 18;
+const uint32_t set_traj_a_per_css= 19;
+const uint32_t get_iq_values = 20;
+const uint32_t reboot_odrive = 22;
+const uint32_t get_vbus_voltage = 23;
+const uint32_t set_vel_pi_gain = 24;
+
+
+/*controller that runs in real time*/
 
 
 struct odrive_motor
@@ -50,8 +89,8 @@ struct robot_leg{
 struct can_frame_odrive
 {
         can_frame socket_can;
-        int node_id;
-        int cmd_id;
+        uint32_t node_id;
+        uint32_t cmd_id;
         int leg_no;
 
 }
@@ -64,22 +103,21 @@ class controller{
 
 public:
     // I/O functions
+    void controller();
     bool can_available();
     bool can_write();
     bool can_read();
     void msg_handler();
-    void real_time_thread();
-    
-
-   
-
 
     
+ 
 private:
     can_frame_odrive rx_msg;
-    can_frame_odrive tx_msg;
+    can_frame_odrive tx_msg; //initialize payload size
     int socket_file_handler;
+    request_msg msg_req;
     std::vector<robot_leg> legs(4);
+    
 
 
 
