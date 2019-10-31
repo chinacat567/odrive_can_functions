@@ -35,9 +35,9 @@ const uint32_t start_anti_cogging = 16;
 const uint32_t set_traj_vel_limit = 17;
 const uint32_t set_traj_accel_limit = 18;
 const uint32_t set_traj_a_per_css= 19;
-const uint32_t get_iq_values = 20;
+const uint32_t get_iq_values = 20; /*implemented in request_msg*/
 const uint32_t reboot_odrive = 22;
-const uint32_t get_vbus_voltage = 23;
+const uint32_t get_vbus_voltage = 23; /*implemented in request_msg*/
 const uint32_t set_vel_pi_gain = 24;
 
 
@@ -108,9 +108,22 @@ public:
     bool can_write();
     bool can_read();
     void msg_handler();
+    void estop(uint32_t node_id);
+    void set_axis_node_id(uint32_t node_id, uint16_t axis_can_node_id);
+    void set_axis_requested_state(uint32_t node_id, uint32_t axis_requested_state);
+    void move_to_pos(uint32_t node_id, int32_t pos);
+    void set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, int16_t vel_ff,int16_t current_ff);
+    void set_vel_setpoint(uint32_t node_id, int32_t vel_setpoint , int16_t current_ff);
+    void set_cur_setpoint(uint32_t node_id, int32_t cur_setpoint);
+    void set_vel_limit(uint32_t node_id, float vel_limit);
+    void start_anticogging(uint32_t node_id);
+    void set_traj_vel_limit(uint32_t node_id float traj_vel_limit);
+    void set_traj_accel_limit(uint32_t node_id float accel_limit, float decel_limit);
+    void set_traj_a_per_css(uint32_t node_id float accel_limit, float traj_a_per_css);
+    void reboot_odrive(uint32_t node_id);
+    void get_vbus_voltage(uint32_t node_id);
+    void set_vel_pi_gain(uint32_t node_id float vel_p_gain, float vel_i_gain);
 
-    
- 
 private:
     can_frame_odrive rx_msg;
     can_frame_odrive tx_msg; //initialize payload size

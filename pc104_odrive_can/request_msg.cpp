@@ -41,6 +41,12 @@ void request_msg::get_iq_values(uint32_t node_id)
 	this->write_msg.cmd_id = get_iq_values;
 	this->write_msg.socket_can.can_id = (this->write_msg.cmd_id & this->write_msg.node_id << 5 & rtr<<30);
 }
+void request_msg::get_vbus_voltage(uint32_t node_id)
+{
+	this->write_msg.node_id = node_id;
+	this->write_msg.cmd_id = get_vbus_voltage;
+	this->write_msg.socket_can.can_id = (this->write_msg.cmd_id & this->write_msg.node_id << 5 & rtr<<30);
+}
 
 
 void request_msg::write_msg()
