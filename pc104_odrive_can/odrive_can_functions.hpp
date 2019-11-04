@@ -4,6 +4,8 @@
 #include<sys/ioctl.h>
 #include<pthread.h>
 #include<request_msg.hpp>
+#include<stdio.h>
+
 #define rtr 1;
 
 #define BIT_MASK_0 0xFF;
@@ -123,21 +125,24 @@ public:
     void reboot_odrive(uint32_t node_id);
     void get_vbus_voltage(uint32_t node_id);
     void set_vel_pi_gain(uint32_t node_id float vel_p_gain, float vel_i_gain);
+    void set_mutex_lock(pthread_mutex_t &lock);
+    void set_internal_thread(pthread_t &thread);
+    bool start_internal_thread();
 
 private:
     can_frame_odrive rx_msg;
     can_frame_odrive tx_msg; //initialize payload size
     int socket_file_handler;
-    request_msg msg_req;
+    pthread_t thread;
     std::vector<robot_leg> legs(4);
-    
+    bool signit_handler;
+    pthread_mutex_t mutex_lock;
 
 
 
 
 
-    
-   
+
 
 
 

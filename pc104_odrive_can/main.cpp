@@ -6,7 +6,7 @@ int main()
 	struct sockaddr_can addr; //socket can adress
 	struct ifreq ifr; //interface structure
 
-	const char *ifname = "vcan0";
+	const char *ifname = "can0";
 	ctrl.socket_file_handler = socket(PF_CAN, SOCK_RAW, CAN_RAW)
 
 	if((ctrl.socket_file_handler) < 0) {

@@ -9,13 +9,23 @@ void controller::controller()
 	}
 	this->tx_msg.socket_can.can_dlc = 8; // 8 byte payload size
 	this->msg_req   //initialize this
+	this->signit_handler = true;
 }
 
 int controller::can_read()
 {	
 	int nbytes;
 	nbytes = read(this->socket_file_handler, this->rx_msg, sizeof(struct can_frame));
-	printf("Read %d bytes\n", nbytes);
+	 if (nbytes < 0) {
+            perror("can raw socket read");
+            return 1;
+    }
+
+    /* paranoid check ... */
+    if (nbytes < sizeof(struct can_frame)) {
+            fprintf(stderr, "read: incomplete CAN frame\n");
+            return 1;
+    }
 	
 }
 
@@ -44,7 +54,7 @@ void controller::msg_handler()
 		case '20': //get IQ
 			this->legs[this->rx_msg.leg_no].iq_setpoint = (float(this->rx_msg.socket_can.data[0]) & float(this->rx_msg.socket_can.data[1])<< 8 & float(this->rx_msg.socket_can.data[2]) << 16 & float(this->rx_msg.socket_can.data[3]) << 24);
 			this->legs[this->rx_msg.leg_no].iq_measured = (float(this->rx_msg.socket_can.data[4]) & float(this->rx_msg.socket_can.data[5])<< 8 & float(this->rx_msg.socket_can.data[6]) << 16 & float(this->rx_msg.socket_can.data[7]) << 24);
-		case '23':
+		case '23'://vbus voltage
 			this->legs[this->rx_msg.leg_no].vbus_voltage = (float(this->rx_msg.socket_can.data[0]) & float(this->rx_msg.socket_can.data[1])<< 8 & float(this->rx_msg.socket_can.data[2]) << 16 & float(this->rx_msg.socket_can.data[3]) << 24);
 
 		default:
@@ -175,6 +185,7 @@ void controller::set_traj_vel_limit(uint32_t node_id float traj_vel_limit)
 
 void controller::set_traj_accel_limit(uint32_t node_id float accel_limit, float decel_limit)
 {
+	pthread_mutex_lock(&this->mutex_lock);
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_traj_accel_limit;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);
@@ -188,11 +199,14 @@ void controller::set_traj_accel_limit(uint32_t node_id float accel_limit, float 
 	this->tx_msg.socket_can.data[5] = decel_limit & BIT_MASK_1;
 	this->tx_msg.socket_can.data[6] = decel_limit & BIT_MASK_2;
 	this->tx_msg.socket_can.data[7] = decel_limit & BIT_MASK_3;	
+	pthread_mutex_unlock(&lock);	
+	this->can_write();
 	
 }
 
 void controller::set_traj_a_per_css(uint32_t node_id float accel_limit, float traj_a_per_css)
 {
+	pthread_mutex_lock(&this->mutex_lock);
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_traj_a_per_css;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);
@@ -200,26 +214,35 @@ void controller::set_traj_a_per_css(uint32_t node_id float accel_limit, float tr
 	this->tx_msg.socket_can.data[0] = traj_a_per_css & BIT_MASK_0;
 	this->tx_msg.socket_can.data[1] = traj_a_per_css & BIT_MASK_1;
 	this->tx_msg.socket_can.data[2] = traj_a_per_css & BIT_MASK_2;
-	this->tx_msg.socket_can.data[3] = traj_a_per_css & BIT_MASK_3;		
+	this->tx_msg.socket_can.data[3] = traj_a_per_css & BIT_MASK_3;	
+	pthread_mutex_unlock(&lock);	
+	this->can_write();		
 	
 }
 
 void controller::reboot_odrive(uint32_t node_id)
 {
+	pthread_mutex_lock(&this->mutex_lock);
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = reboot_odrive;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);		
+	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);	
+	pthread_mutex_unlock(&lock);	
+	this->can_write();	
 }
 
 void controller::get_vbus_voltage(uint32_t node_id)
 {
+	pthread_mutex_lock(&this->mutex_lock);
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = get_vbus_voltage;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);
+	pthread_mutex_unlock(&lock);
+	this->can_write();	
 	
 }
 void controller::set_vel_pi_gain(uint32_t node_id float vel_p_gain, float vel_i_gain)
 {
+	pthread_mutex_lock(&this->mutex_lock);
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_vel_pi_gain;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id & this->tx_msg.node_id << 5);
@@ -232,27 +255,55 @@ void controller::set_vel_pi_gain(uint32_t node_id float vel_p_gain, float vel_i_
 	this->tx_msg.socket_can.data[4] = vel_i_gain & BIT_MASK_0;
 	this->tx_msg.socket_can.data[5] = vel_i_gain & BIT_MASK_1;
 	this->tx_msg.socket_can.data[6] = vel_i_gain & BIT_MASK_2;
-	this->tx_msg.socket_can.data[7] = vel_i_gain & BIT_MASK_3;			
+	this->tx_msg.socket_can.data[7] = vel_i_gain & BIT_MASK_3;		
+	pthread_mutex_unlock(&lock);
+	this->can_write();	
 	
 }
+
+void* controller::internal_thread_function()
+{
+	while(signit_handler)
+	{
+		pthread_mutex_lock(&this->mutex_lock);
+		this->can_read();
+		this->msg_handler();
+		pthread_mutex_unlock(&lock);
+
+	}
+
+
+}
 	
+void controller::set_internal_thread(pthread_t &thread)
+{
+	this->thread = thread;
+}
 
-	
-
-
-		
-
-
-
-
+bool controller::start_internal_thread()
+{
+	return (pthread_create(&this->thread, NULL, &internal_thread_function, NULL) == 0); /*complete this later on*/
+}
+void controller::set_mutex_lock(pthread_mutex_t &lock)
+{
+	this->mutex_lock = lock;
+}
 
 
 int controller::can_write()
 {	
 	int nbytes;
 	nbytes = write(this->socket_file_handler, this->tx_msg, sizeof(struct can_frame));
-	printf("Wrote %d bytes\n", nbytes);
-	return nbytes;
+	if (nbytes < 0) {
+            perror("can raw socket write");
+            return 1;
+    }
+
+    /* paranoid check ... */
+    if (nbytes < sizeof(struct can_frame)) {
+            fprintf(stderr, "write: incomplete CAN frame\n");
+            return 1;
+    }
 
 }
 
