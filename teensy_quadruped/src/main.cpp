@@ -31,36 +31,38 @@ const uint32_t get_vbus_voltage = 23; /*implemented in request_msg*/
 // -------------------------------------------------------------
 void request_motor_error(uint32_t node_id)
 {
-	tx_msg.id = (get_motor_error & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_motor_error | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
+  Serial.println("Wrote motor error request");
 
 }
 void request_encoder_error(uint32_t node_id)
 {
-	tx_msg.id = (get_encoder_error & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_encoder_error | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
 
 }
 void request_encoder_estimate(uint32_t node_id)
 {
-	tx_msg.id = (get_encoder_estimate & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_encoder_estimate | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
+  Serial.println("Wrote encoder estimate request");
 
 }
 void request_encoder_counts(uint32_t node_id)
 {
-	tx_msg.id = (get_encoder_counts & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_encoder_counts | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
 
 }
 void request_iq_values(uint32_t node_id)
 {
-	tx_msg.id = (get_iq_values & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_iq_values | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
 
 }void request_vbus_voltage(uint32_t node_id)
 {
-	tx_msg.id = (get_vbus_voltage & node_id << 5 & rtr<<30);
+	tx_msg.id = (get_vbus_voltage | node_id << 5 | rtr<<30);
   CANbus.write(tx_msg);
 
 }
@@ -74,6 +76,11 @@ void setup(void)
   while(!Serial);
   Serial.println(F("Teensy writing on CANBUS"));
   sysTimer.reset();
+
+   for (int i = 0; i < 8; i++)
+  {
+    tx_msg.buf[i] = 0;
+  }
 }
 
 
@@ -85,9 +92,7 @@ void loop(void)
       --txTimer;
     }
   }
-  
-  tx_msg.buf[8] = {0,0,0,0,0,0,0,0}; 
-
+ 
   // insert a time delay between transmissions
   if ( !txTimer ) {
     
