@@ -39,23 +39,23 @@ void controller::msg_handler()
 	switch(this->rx_msg.cmd_id)
 	{
 		case '1': //hearbeat message
-			this->legs[this->rx_msg.leg_no].axis_error = (uint32_t(this->rx_msg.socket_can.data[0]) & uint32_t(this->rx_msg.socket_can.data[1])<< 8 & uint32_t(this->rx_msg.socket_can.data[2]) << 16 & uint32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.leg_no].axis_current_state = (uint32_t(this->rx_msg.socket_can.data[4]) & uint32_t(this->rx_msg.socket_can.data[5])<< 8 & uint32_t(this->rx_msg.socket_can.data[6]) << 16 & uint32_t(this->rx_msg.socket_can.data[7]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].axis_error = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].axis_current_state = (uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);
 		case '3': //get motor error
-			this->legs[this->rx_msg.leg_no].motor_error = (uint32_t(this->rx_msg.socket_can.data[0]) & uint32_t(this->rx_msg.socket_can.data[1])<< 8 & uint32_t(this->rx_msg.socket_can.data[2]) << 16 & uint32_t(this->rx_msg.socket_can.data[3]) << 24);
+			this->[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].motor_error = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
 		case '4': //get encoder error
-			this->legs[this->rx_msg.leg_no].encoder_error = (uint32_t(this->rx_msg.socket_can.data[4]) & uint32_t(this->rx_msg.socket_can.data[5])<< 8 & uint32_t(this->rx_msg.socket_can.data[6]) << 16 & uint32_t(this->rx_msg.socket_can.data[7]) << 24);;
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_error = (uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);;
 		case '9': //get encoder estimates
-			this->legs[this->rx_msg.leg_no].encoder_pos_estimate = (float(this->rx_msg.socket_can.data[0]) & float(this->rx_msg.socket_can.data[1])<< 8 & float(this->rx_msg.socket_can.data[2]) << 16 & float(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.leg_no].encoder_vel_estimate =(float(this->rx_msg.socket_can.data[4]) & float(this->rx_msg.socket_can.data[5])<< 8 & float(this->rx_msg.socket_can.data[6]) << 16 & float(this->rx_msg.socket_can.data[7]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_pos_estimate = (float(this->rx_msg.socket_can.data[0]) | float(this->rx_msg.socket_can.data[1])<< 8 | float(this->rx_msg.socket_can.data[2]) << 16 | float(this->rx_msg.socket_can.data[3]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_vel_estimate =(float(this->rx_msg.socket_can.data[4]) | float(this->rx_msg.socket_can.data[5])<< 8 | float(this->rx_msg.socket_can.data[6]) << 16 | float(this->rx_msg.socket_can.data[7]) << 24);
 		case '10': //get encoder counts
-			this->legs[this->rx_msg.leg_no].encoder_shadow_count = (int32_t(this->rx_msg.socket_can.data[0]) & int32_t(this->rx_msg.socket_can.data[1])<< 8 & int32_t(this->rx_msg.socket_can.data[2]) << 16 & int32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.leg_no].encoder_count_in_cpr =(int32_t(this->rx_msg.socket_can.data[4]) & int32_t(this->rx_msg.socket_can.data[5])<< 8 & int32_t(this->rx_msg.socket_can.data[6]) << 16 & int32_t(this->rx_msg.socket_can.data[7]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_shadow_count = (int32_t(this->rx_msg.socket_can.data[0]) | int32_t(this->rx_msg.socket_can.data[1])<< 8 | int32_t(this->rx_msg.socket_can.data[2]) << 16 | int32_t(this->rx_msg.socket_can.data[3]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_count_in_cpr =(int32_t(this->rx_msg.socket_can.data[4]) | int32_t(this->rx_msg.socket_can.data[5])<< 8 | int32_t(this->rx_msg.socket_can.data[6]) << 16 | int32_t(this->rx_msg.socket_can.data[7]) << 24);
 		case '20': //get IQ
-			this->legs[this->rx_msg.leg_no].iq_setpoint = (float(this->rx_msg.socket_can.data[0]) & float(this->rx_msg.socket_can.data[1])<< 8 & float(this->rx_msg.socket_can.data[2]) << 16 & float(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.leg_no].iq_measured = (float(this->rx_msg.socket_can.data[4]) & float(this->rx_msg.socket_can.data[5])<< 8 & float(this->rx_msg.socket_can.data[6]) << 16 & float(this->rx_msg.socket_can.data[7]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].iq_setpoint = (float(this->rx_msg.socket_can.data[0]) | float(this->rx_msg.socket_can.data[1])<< 8 | float(this->rx_msg.socket_can.data[2]) << 16 | float(this->rx_msg.socket_can.data[3]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].iq_measured = (float(this->rx_msg.socket_can.data[4]) | float(this->rx_msg.socket_can.data[5])<< 8 | float(this->rx_msg.socket_can.data[6]) << 16 | float(this->rx_msg.socket_can.data[7]) << 24);
 		case '23'://vbus voltage
-			this->legs[this->rx_msg.leg_no].vbus_voltage = (float(this->rx_msg.socket_can.data[0]) & float(this->rx_msg.socket_can.data[1])<< 8 & float(this->rx_msg.socket_can.data[2]) << 16 & float(this->rx_msg.socket_can.data[3]) << 24);
+			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].vbus_voltage = (float(this->rx_msg.socket_can.data[0]) | float(this->rx_msg.socket_can.data[1])<< 8 | float(this->rx_msg.socket_can.data[2]) << 16 | float(this->rx_msg.socket_can.data[3]) << 24);
 
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;

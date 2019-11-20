@@ -26,7 +26,7 @@ void bit_masking(&can_frame_odrive can_frame)
 }
 
 //function for sorting CAN node ids into respective robot legs
-void sort_can_node_id(std::vector<robot_leg> &legs,can_frame_odrive &msg)
+void sort_can_node_id(std::vector<std::vector<odrive_motor>> &legs,can_frame_odrive &msg)
 {
 	
 	/*	routine for allotting can_node_id of ODrive. Motors are numbered from 1-13 in the following format
@@ -41,8 +41,9 @@ void sort_can_node_id(std::vector<robot_leg> &legs,can_frame_odrive &msg)
 			{
 				if((msg.node_id+2)/3 ==i) 
 			{
-				legs[i-1].knee.axis_can_node_id = 3*i-2; 
-				msg.leg_no = i-1;
+				legs[i-1][0].axis_can_node_id = 3*i-2; 
+				msg.identifier[0] = i-1;
+				msg.identifier[1] = 0;
 			}
 
 			}		
@@ -55,8 +56,9 @@ void sort_can_node_id(std::vector<robot_leg> &legs,can_frame_odrive &msg)
 			{
 				if((msg.node_id+1)/3 ==i) 
 			{
-				legs[i-1].abduction.axis_can_node_id = 3*i-1; 
-				msg.leg_no = i-1;
+				legs[i-1][1].axis_can_node_id = 3*i-1; 
+				msg.identifier[1] = i-1;
+				msg.identifier[2] = 1;
 			}
 
 			}	
@@ -70,8 +72,9 @@ void sort_can_node_id(std::vector<robot_leg> &legs,can_frame_odrive &msg)
 			{
 				if((msg.node_id)/3 ==i) 
 			{
-				legs[i-1].hip.axis_can_node_id = 3*i; 
-				msg.leg_no = i-1;
+				legs[i-1][2].axis_can_node_id = 3*i; 
+				msg.identifier[1] = i-1;
+				msg.identifier[2] = 1;
 			}
 
 			}

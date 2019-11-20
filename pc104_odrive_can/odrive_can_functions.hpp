@@ -82,24 +82,14 @@ struct odrive_motor
     float velocity_i_gain; 
 }
 
-struct robot_leg{
-    odrive_motor knee;
-    odrive_motor abduction;
-    odrive_motor hip;
 
-};
 struct can_frame_odrive
 {
         can_frame socket_can;
         uint32_t node_id;
         uint32_t cmd_id;
         int leg_no;
-
 }
-
-
-void bit_masking;
-
 
 class controller{
 
@@ -134,7 +124,7 @@ private:
     can_frame_odrive tx_msg; //initialize payload size
     int socket_file_handler;
     pthread_t thread;
-    std::vector<robot_leg> legs(4);
+    std::vector<std::vector<odrive_motor>> legs(4,std::vector<odrive_motor>(3));
     bool signit_handler;
     pthread_mutex_t mutex_lock;
 
