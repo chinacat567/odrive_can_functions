@@ -88,7 +88,7 @@ struct can_frame_odrive
         can_frame socket_can;
         uint32_t node_id;
         uint32_t cmd_id;
-        int leg_no;
+        int identifier[2]; // leg no, abduction/knee/hip
 }
 
 class controller{
