@@ -80,7 +80,7 @@ struct odrive_motor
     float vbus_voltage; 
     float velocity_p_gain; 
     float velocity_i_gain; 
-}
+};
 
 
 struct can_frame_odrive
@@ -89,7 +89,7 @@ struct can_frame_odrive
         uint32_t node_id;
         uint32_t cmd_id;
         int identifier[2]; // leg no, abduction/knee/hip
-}
+};
 
 class controller{
 
@@ -124,9 +124,11 @@ private:
     can_frame_odrive tx_msg; //initialize payload size
     int socket_file_handler;
     pthread_t thread;
-    std::vector<std::vector<odrive_motor>> legs(4,std::vector<odrive_motor>(3));
+    legs[4][3];
     bool signit_handler;
     pthread_mutex_t mutex_lock;
+    
+};
 
 
 

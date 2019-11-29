@@ -21,8 +21,8 @@ static CAN_message_t tx_msg;
 unsigned int txTimer;
 int txCount;
 
-const uint32_t nodeid_0 = 1;
-const uint32_t nodeid_1 = 2;
+const uint32_t nodeid_0 = 7;
+const uint32_t nodeid_1 = 8;
 const uint32_t get_motor_error = 3; /*implemented in request_msg*/
 const uint32_t get_encoder_error = 4;/*implemented in request_msg*/
 const uint32_t get_encoder_estimate = 9; /*implemented in request_msg*/
@@ -36,6 +36,7 @@ void request_motor_error(uint32_t node_id)
 {
 	tx_msg.id = (get_motor_error | node_id << 5);
   if(!Can0.write(tx_msg)) Serial.println("Failed to write motor error request");
+  else Serial.println(tx_msg.id);
 
 
 }
@@ -49,6 +50,7 @@ void request_encoder_estimate(uint32_t node_id)
 {
 	tx_msg.id = (get_encoder_estimate | node_id << 5);
   if(!Can0.write(tx_msg)) Serial.println("Failed to write encoder estimate request");
+  else Serial.println(tx_msg.id);
 
 }
 void request_encoder_counts(uint32_t node_id)
@@ -99,7 +101,7 @@ void loop(void)
 
   // insert a time delay between transmissions
   if ( !txTimer ) {
-    txTimer = 0;//milliseconds
+    txTimer = 100;//milliseconds
    
     // send 6 at a time to force tx buffering
     txCount = 6;
@@ -107,8 +109,8 @@ void loop(void)
     Serial.println(".");
     request_encoder_estimate(nodeid_0);
     request_encoder_estimate(nodeid_1);
-    request_motor_error(nodeid_0);
-    request_motor_error(nodeid_1);
+    // request_motor_error(nodeid_0);
+    // request_motor_error(nodeid_1);
     // request_encoder_error(uint32_t node_id);
     // request_encoder_counts(uint32_t node_id);
     // request_iq_values(uint32_t node_id);
