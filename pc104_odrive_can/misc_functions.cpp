@@ -15,7 +15,7 @@ int binary_to_decimal(std::string binaryString)
 }
 
 //bit masking function to seperate upper 6 (node_id) and lower 5 (cmd_id) bits of the can_id in the can frame
-void bit_masking(&can_frame_odrive can_frame)
+void bit_masking(can_frame_odrive &can_frame)
 {
 	
 	__u32 cmd_id_mask = 0x1F;
@@ -26,7 +26,7 @@ void bit_masking(&can_frame_odrive can_frame)
 }
 
 //function for sorting CAN node ids into respective robot legs
-void sort_can_node_id(std::vector<std::vector<odrive_motor>> &legs,can_frame_odrive &msg)
+void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 {
 	
 	/*	routine for allotting can_node_id of ODrive. Motors are numbered from 1-13 in the following format
