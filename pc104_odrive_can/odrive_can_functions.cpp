@@ -48,45 +48,60 @@ bool controller::can_write()
 void controller::msg_handler()
 {
 
-	bit_masking(this->rx_msg); // get node id, cmd id
-		sort_can_node_id(this->legs,this->rx_msg); // assign node id to respective leg
+	bit_masking(this->rx_msg); /*get node id, cmd id*/
+	sort_can_node_id(this->legs,this->rx_msg); /*assign node id to respective leg*/
+	uint8_t a,b,c,d,e,f,g,h; /*temp storage variale for the CAN data packets*/
+	int leg_no, type_no; /*temp storage variables for leg_no and type_no*/
 
-	//read the received can frame
+	leg_no = this->rx_msg.idn.leg_no;
+	type_no = this->rx_msg.idn.type_no;
+
+	a = this->rx_msg.socket_can.data[0];
+	b = this->rx_msg.socket_can.data[1];
+	c = this->rx_msg.socket_can.data[2];
+	d = this->rx_msg.socket_can.data[3];
+
+	e = this->rx_msg.socket_can.data[4];
+	f = this->rx_msg.socket_can.data[5];
+	g = this->rx_msg.socket_can.data[6];
+	h = this->rx_msg.socket_can.data[7];
+
+	/*read the received can frame*/
 	switch(this->rx_msg.cmd_id)
 	{
-		case '1': //hearbeat message
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].axis_error = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].axis_current_state = (uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);
+		case '1': /*hearbeat message*/
+			this->legs[leg_no][type_no].axis_error = (a | b << 8 | c << 16 | d << 24);
+			this->legs[leg_no][type_no].axis_current_state = (e | f << 8 | g << 16 | h << 24);
 			break;
-		case '3': //get motor error
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].motor_error = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
+		case '3': /*get motor error*/
+			this->legs[leg_no][type_no].motor_error = (a | b << 8 | c << 16 | d << 24);
 			break;
-		case '4': //get encoder error
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_error = (uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);;
+		case '4': /*get encoder error*/
+			this->legs[leg_no][type_no].encoder_error = (e | f << 8 | g << 16 | h << 24);;
 			break;
-		case '9': //get encoder estimates
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_pos_estimate = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_vel_estimate =(uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);
+		case '9': /*get encoder estimates*/
+			bytes2Float(&a, &this->legs[leg_no][type_no].encoder_pos_estimate);/*FLOAT*/
+			bytes2Float(&e, &this->legs[leg_no][type_no].encoder_vel_estimate ); /*FLOAT*/
 			break;
-		case '10': //get encoder counts
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_shadow_count = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].encoder_count_in_cpr =(uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);
+		case '10': /*get encoder counts*/
+			this->legs[leg_no][type_no].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24); /*SIGNED INT*/
+			this->legs[leg_no][type_no].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24); /*SIGNED INT*/
 			break;
-		case '20': //get IQ
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].iq_setpoint = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].iq_measured = (uint32_t(this->rx_msg.socket_can.data[4]) | uint32_t(this->rx_msg.socket_can.data[5])<< 8 | uint32_t(this->rx_msg.socket_can.data[6]) << 16 | uint32_t(this->rx_msg.socket_can.data[7]) << 24);
+		case '20': /*get IQ*/
+			 bytes2Float(&a, &this->legs[leg_no][type_no].iq_setpoint ); /*FLOAT*/
+			 bytes2Float(&e, &this->legs[leg_no][type_no].iq_measured ); /*FLOAT*/
 			break;
-		case '23'://vbus voltage
-			this->legs[this->rx_msg.identifier[0]][this->rx_msg.identifier[1]].vbus_voltage = (uint32_t(this->rx_msg.socket_can.data[0]) | uint32_t(this->rx_msg.socket_can.data[1])<< 8 | uint32_t(this->rx_msg.socket_can.data[2]) << 16 | uint32_t(this->rx_msg.socket_can.data[3]) << 24);
+		case '23':/*vbus voltage*/
+			 bytes2Float(&a, &this->legs[leg_no][type_no].vbus_voltage); /*FLOAT*/
 			break;
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;
 
 	}
 
-	// error detection
+	/*error detection and handling*/
 
-}	// create a data stream for the sensor data 
+}	
 
 
 /*PTHREAD RELATED FUNCTIONS*/
@@ -208,15 +223,18 @@ void controller::set_cur_setpoint(uint32_t node_id, int32_t cur_setpoint)
 	
 }
 
-void controller::set_vel_limit(uint32_t node_id, float vel_limit)
+void controller::set_vel_limit(uint32_t node_id, float vel_limit)  /*FLOAT*/
 {
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_vel_limit_cmd;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = (vel_limit & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (vel_limit & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (vel_limit & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (vel_limit & BIT_MASK_3) << 24;	
+
+	float2Bytes(vel_limit, this->tx_msg.socket_can.data);
+	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
+	// this->tx_msg.socket_can.data[0] = (vel_limit & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[1] = (vel_limit & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[2] = (vel_limit & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[3] = (vel_limit & BIT_MASK_3) << 24;	
 	
 }
 void controller::start_anticogging(uint32_t node_id)
@@ -226,50 +244,62 @@ void controller::start_anticogging(uint32_t node_id)
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 	
 }
-void controller::set_traj_vel_limit(uint32_t node_id , float traj_vel_limit)
+void controller::set_traj_vel_limit(uint32_t node_id , float traj_vel_limit) /*FLOAT*/
 {
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_traj_vel_limit_cmd;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	this->tx_msg.socket_can.data[0] = (traj_vel_limit & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (traj_vel_limit & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (traj_vel_limit & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (traj_vel_limit & BIT_MASK_3) << 24;	
+	float2Bytes(traj_vel_limit, this->tx_msg.socket_can.data);
+	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
+
+	// this->tx_msg.socket_can.data[0] = (traj_vel_limit & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[1] = (traj_vel_limit & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[2] = (traj_vel_limit & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[3] = (traj_vel_limit & BIT_MASK_3) << 24;	
 	
 }
 
-void controller::set_traj_accel_limit(uint32_t node_id , float accel_limit, float decel_limit)
+void controller::set_traj_accel_limit(uint32_t node_id , float accel_limit, float decel_limit)  /*FLOAT*/
 {
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_traj_accel_limit_cmd;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	this->tx_msg.socket_can.data[0] = (accel_limit & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (accel_limit & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (accel_limit & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (accel_limit & BIT_MASK_3) << 24;	
+	float2Bytes(accel_limit, this->tx_msg.socket_can.data);
+	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
+	float2Bytes(decel_limit, &this->tx_msg.socket_can.data[4]);
+	rvereseArray(this->tx_msg.socket_can.data, 4, 7);
 
-	this->tx_msg.socket_can.data[4] = (decel_limit & BIT_MASK_0);
-	this->tx_msg.socket_can.data[5] = (decel_limit & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[6] = (decel_limit & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[7] = (decel_limit & BIT_MASK_3) << 24;	
+
+	// this->tx_msg.socket_can.data[0] = (accel_limit & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[1] = (accel_limit & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[2] = (accel_limit & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[3] = (accel_limit & BIT_MASK_3) << 24;	
+
+	// this->tx_msg.socket_can.data[4] = (decel_limit & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[5] = (decel_limit & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[6] = (decel_limit & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[7] = (decel_limit & BIT_MASK_3) << 24;	
 	
 	
 }
 
-void controller::set_traj_a_per_css(uint32_t node_id , float accel_limit, float traj_a_per_css)
+void controller::set_traj_a_per_css(uint32_t node_id , float traj_a_per_css) /*FLOAT*/
 {
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_traj_a_per_css_cmd;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	this->tx_msg.socket_can.data[0] = (traj_a_per_css & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (traj_a_per_css & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (traj_a_per_css & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (traj_a_per_css & BIT_MASK_3) << 24;	
+	float2Bytes(traj_a_per_css, this->tx_msg.socket_can.data);
+	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
+
+	// this->tx_msg.socket_can.data[0] = (traj_a_per_css & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[1] = (traj_a_per_css & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[2] = (traj_a_per_css & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[3] = (traj_a_per_css & BIT_MASK_3) << 24;	
 			
 	
 }
@@ -292,22 +322,28 @@ void controller::get_vbus_voltage(uint32_t node_id)
 		
 	
 }
-void controller::set_vel_pi_gain(uint32_t node_id, float vel_p_gain, float vel_i_gain)
+void controller::set_vel_pi_gain(uint32_t node_id, float vel_p_gain, float vel_i_gain)  /*FLOAT*/
 {
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = set_vel_pi_gain_cmd;
 	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	this->tx_msg.socket_can.data[0] = (vel_p_gain & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (vel_p_gain & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (vel_p_gain & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (vel_p_gain & BIT_MASK_3) << 24;
+	float2Bytes(vel_p_gain, this->tx_msg.socket_can.data);
+	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
+	float2Bytes(vel_i_gain, &this->tx_msg.socket_can.data[4]);
+	rvereseArray(this->tx_msg.socket_can.data, 4, 7);
 
-	this->tx_msg.socket_can.data[4] = (vel_i_gain & BIT_MASK_0);
-	this->tx_msg.socket_can.data[5] = (vel_i_gain & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[6] = (vel_i_gain & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[7] = (vel_i_gain & BIT_MASK_3) << 24;			
+
+	// this->tx_msg.socket_can.data[0] = (vel_p_gain & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[1] = (vel_p_gain & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[2] = (vel_p_gain & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[3] = (vel_p_gain & BIT_MASK_3) << 24;
+
+	// this->tx_msg.socket_can.data[4] = (vel_i_gain & BIT_MASK_0);
+	// this->tx_msg.socket_can.data[5] = (vel_i_gain & BIT_MASK_1) << 8;
+	// this->tx_msg.socket_can.data[6] = (vel_i_gain & BIT_MASK_2) << 16;
+	// this->tx_msg.socket_can.data[7] = (vel_i_gain & BIT_MASK_3) << 24;			
 	
 }
 

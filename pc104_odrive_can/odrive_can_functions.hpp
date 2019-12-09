@@ -77,13 +77,19 @@ struct odrive_motor
     float velocity_i_gain; 
 };
 
+struct identifier
+{
+    int leg_no; /* leg_no identifier*/
+    int type_no; /* type_no identifier 0-knee, 1-abduction, 2-hip*/
+};
+
 
 struct can_frame_odrive
 {
         can_frame socket_can;
         uint32_t node_id;
         uint32_t cmd_id;
-        int identifier[2]; // leg no, abduction/knee/hip
+        identifier idn;
 };
 
 class controller{
@@ -106,7 +112,7 @@ public:
     void start_anticogging(uint32_t node_id);
     void set_traj_vel_limit(uint32_t node_id, float traj_vel_limit);
     void set_traj_accel_limit(uint32_t node_id ,float accel_limit, float decel_limit);
-    void set_traj_a_per_css(uint32_t node_id, float accel_limit, float traj_a_per_css);
+    void set_traj_a_per_css(uint32_t node_id, float traj_a_per_css);
     void reboot_odrive(uint32_t node_id);
     void get_vbus_voltage(uint32_t node_id);
     void set_vel_pi_gain(uint32_t node_id ,float vel_p_gain, float vel_i_gain);
