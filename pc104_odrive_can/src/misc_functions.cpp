@@ -1,20 +1,6 @@
-#include<misc_functions.hpp>
+#include"misc_functions.hpp"
 
-int binary_to_decimal(std::string binaryString)
-{
-	int int_value = 0;
-	int indexCounter = 0;
-	for(int i=binaryString.length()-1;i>=0;i--){
-
-    	if(binaryString[i]=='1'){
-        	int_value += pow(2, indexCounter);
-    	}
-    	indexCounter++;
-	}
-	return int_value;
-}
-
-//bit masking function to seperate upper 6 (node_id) and lower 5 (cmd_id) bits of the can_id in the can frame
+/*bit masking function to seperate upper 6 (node_id) and lower 5 (cmd_id) bits of the can_id in the can frame*/
 void bit_masking(can_frame_odrive &can_frame)
 {
 	
@@ -25,7 +11,7 @@ void bit_masking(can_frame_odrive &can_frame)
     
 }
 
-//function for sorting CAN node ids into respective robot legs
+/*function for sorting CAN node ids into respective robot legs*/
 void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 {
 	
@@ -88,13 +74,14 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 }
 
 /*architecture dependent float to byte converter (Endian-ness)
-*/void float2Bytes(float float_variable, uint8_t * bytes_temp){ 
+*/
+void float2Bytes(float float_variable, uint8_t * bytes_temp){ 
   union {
     float a;
     uint8_t bytes[4];
   } thing;
   thing.a = float_variable;
-  memcpy(bytes_temp, thing.bytes, 4);
+  // memcpy(bytes_temp, thing.bytes, 4);
 }
 
 /*architecture dependent byte to float converter (Endian-ness)

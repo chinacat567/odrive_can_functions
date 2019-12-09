@@ -8,6 +8,7 @@
 #include<stdint.h>
 #include<iostream>
 
+
 #define rtr 1
 
 #define BIT_MASK_0 0xFF
@@ -41,8 +42,8 @@ const uint32_t get_vbus_voltage_cmd = 23; /*implemented in request_msg*/
 const uint32_t set_vel_pi_gain_cmd = 24;
 
 
-/*controller that runs in real time*/
 
+/* struct for storing the motor data points */
 
 struct odrive_motor
 {
@@ -51,7 +52,7 @@ struct odrive_motor
     uint32_t encoder_error;
     uint32_t sensorless_error;
     uint32_t axis_error;
-    uint16_t axis_can_nod_id;
+    uint16_t axis_can_node_id;
     uint32_t axis_requested_state;
     float encoder_pos_estimate;
     float encoder_vel_estimate;
@@ -95,12 +96,20 @@ struct can_frame_odrive
 class controller{
 
 public:
-    // I/O functions
+    /*constructor*/
     controller();
-    bool can_available();
+    virtual ~controller() {};
+    
+    /* method to write tx_msg class member on the CAN BUS*/
     bool can_write();
+    /*  method to read data from the CAN BUS and populate rx_data class member*/
     bool can_read();
+    /* msg handling method to manage incoming data and poulate member variables accordingly*/
     void msg_handler();
+    /* method to set the socketcan filehandler*/
+    void set_socket(int socket_file_handler);
+ 
+    /* methods that set ODrive parameters*/
     void estop(uint32_t node_id);
     void set_axis_node_id(uint32_t node_id, uint16_t axis_can_node_id);
     void set_axis_requested_state(uint32_t node_id, uint32_t axis_requested_state);
@@ -116,19 +125,30 @@ public:
     void reboot_odrive(uint32_t node_id);
     void get_vbus_voltage(uint32_t node_id);
     void set_vel_pi_gain(uint32_t node_id ,float vel_p_gain, float vel_i_gain);
+
+
+    /* accessor methods : used for accessing private class members from outside the class*/
+    odrive_motor get_motor_data(int x, int y);
+
+    /*MULTITHREADING FUNCTIONS*/
     void set_mutex_lock(pthread_mutex_t &lock);
     void set_internal_thread(pthread_t &thread);
-    void* internal_thread_function();
+    /*returns true is the thread was started successfully, false in case of errors*/
     bool start_internal_thread();
+    
 
 private:
     can_frame_odrive rx_msg;
-    can_frame_odrive tx_msg; //initialize payload size
+    can_frame_odrive tx_msg;
     int socket_file_handler;
     pthread_t thread;
+   /*'legs' member variable, contains motor data for all the 12 motors*/
     odrive_motor legs[4][3];
     bool signit_handler;
     pthread_mutex_t mutex_lock;
+    /* thread function that runs an infinite loop*/
+    void* internal_thread_function();
+    static void * InternalThreadEntryFunc(void * This);
     
 };
 

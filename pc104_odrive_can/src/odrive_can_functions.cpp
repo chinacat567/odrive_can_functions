@@ -1,15 +1,18 @@
-#include "odrive_can_functions.hpp"
 #include "misc_functions.hpp"
 
 /*CAN READ AND WRITE FUNCTIONS*/
 
 controller::controller()
 {
+	
+	/*initialize rx and tx can messages structs*/
 	for (int i = 0; i < 7; ++i)
 	{
 		this->tx_msg.socket_can.data[i] = 0;
+		this->rx_msg.socket_can.data[i] = 0;
 	}
-	this->tx_msg.socket_can.can_dlc = 8; // 8 byte payload size
+	this->tx_msg.socket_can.can_dlc = 8; 
+	this->rx_msg.socket_can.can_dlc = 8; 
 	this->signit_handler = true;
 }
 
@@ -24,6 +27,10 @@ bool controller::can_read()
             return 1;
     }
 	
+}
+void controller::set_socket(int socket_file_handler)
+{
+	this->socket_file_handler = socket_file_handler;
 }
 
 bool controller::can_write()
@@ -126,14 +133,28 @@ void controller::set_internal_thread(pthread_t &thread)
 
 bool controller::start_internal_thread()
 {
-	return (pthread_create(&this->thread, NULL, &controller::internal_thread_function, NULL) == 0); /*complete this later on*/
+	return (pthread_create(&this->thread, NULL, InternalThreadEntryFunc, NULL) == 0); /*complete this later on*/
 }
 void controller::set_mutex_lock(pthread_mutex_t &lock)
 {
 	this->mutex_lock = lock;
 }
 
+void * controller::InternalThreadEntryFunc(void * This)
+{
+	((controller *)This)->internal_thread_function();
+	return NULL;
 
+}
+
+odrive_motor controller::get_motor_data(int x, int y)
+ {
+ 	if( x<0 || x>3 || y<0 || y>2)
+ 	{
+ 		cout << " Invalid access" << endl ;
+ 	}
+ 	return this->legs[x][y];
+ }
 
 
 /*IMPLEMENTATION OF ALL ODRIVE FUNCTIONS EXCEPT FOR REQUEST MSGS*/
