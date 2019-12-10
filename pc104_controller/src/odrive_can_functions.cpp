@@ -1,11 +1,12 @@
 /* Created by Sumantra on 9th December 2019 */
+/* Ver 1.1 Major bug fix by Chang Hong 10 Dec 2019 */
 
 
 #include "misc_functions.hpp"
 
 /*CAN READ AND WRITE FUNCTIONS*/
 
-controller::controller()
+controller::controller(int socket_fd)
 {
 	
 	/*initialize rx and tx can messages structs*/
@@ -16,6 +17,8 @@ controller::controller()
 	}
 	this->tx_msg.socket_can.can_dlc = 8; 
 	this->rx_msg.socket_can.can_dlc = 8; 
+	socket_file_handler = socket_fd;
+	
 	this->signit_handler = true;
 }
 
@@ -31,15 +34,13 @@ bool controller::can_read()
     }
 	
 }
-void controller::set_socket(int socket_file_handler)
-{
-	this->socket_file_handler = socket_file_handler;
-}
 
 bool controller::can_write()
 {	
 	int nbytes;
-	nbytes = write(this->socket_file_handler, &this->tx_msg, sizeof(struct can_frame));
+	printf("can_write %d:",socket_file_handler);
+	
+	nbytes = write(this->socket_file_handler, &(tx_msg.cframe), sizeof(struct can_frame));
 	if (nbytes < 0) {
             perror("can raw socket write");
             return 1;
@@ -47,7 +48,7 @@ bool controller::can_write()
 
     /* paranoid check ... */
     if (nbytes < sizeof(struct can_frame)) {
-            fprintf(stderr, "write: incomplete CAN frame\n");
+            perror("write: incomplete CAN frame\n");
             return 1;
     }
 
@@ -165,166 +166,158 @@ odrive_motor controller::get_motor_data(int x, int y)
 void controller::estop(uint32_t node_id)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = estop_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = ESTOP;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	can_write();
 }
 void controller::set_axis_node_id(uint32_t node_id, uint16_t axis_can_node_id)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_axis_node_id_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = axis_can_node_id & BIT_MASK_0;
-	this->tx_msg.socket_can.data[1] = (axis_can_node_id & BIT_MASK_1) >>8;
-	
+	this->tx_msg.cmd_id = SET_AXIS_NODE_ID;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.data[0] = axis_can_node_id & BIT_MASK_0;
+	this->tx_msg.cframe.data[1] = (axis_can_node_id & BIT_MASK_1) >>8;
+	can_write();
 }
 void controller::set_axis_requested_state(uint32_t node_id, uint32_t axis_requested_state)
 {
-	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_axis_requested_state_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = axis_requested_state & BIT_MASK_0;
-	this->tx_msg.socket_can.data[1] = (axis_requested_state & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (axis_requested_state & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (axis_requested_state & BIT_MASK_3) << 24;	
-	
+	/*
+		AXIS_STATE_UNDEFINED = 0
+		AXIS_STATE_IDLE = 1
+		AXIS_STATE_STARTUP_SEQUENCE = 2
+		AXIS_STATE_FULL_CALIBRATION_SEQUENCE = 3
+		AXIS_STATE_MOTOR_CALIBRATION = 4
+		AXIS_STATE_SENSORLESS_CONTROL = 5
+		AXIS_STATE_ENCODER_INDEX_SEARCH = 6
+		AXIS_STATE_ENCODER_OFFSET_CALIBRATION = 7
+		AXIS_STATE_CLOSED_LOOP_CONTROL = 8
+		AXIS_STATE_LOCKIN_SPIN = 9
+		AXIS_STATE_ENCODER_DIR_FIND = 10
+	*/
+
+	tx_msg.node_id = node_id;
+	tx_msg.cmd_id = SET_AXIS_REQUESTED_STATE;
+	tx_msg.cframe.can_id = (tx_msg.cmd_id | tx_msg.node_id << 5);
+	tx_msg.cframe.data[0] = axis_requested_state & BIT_MASK_0;
+	tx_msg.cframe.data[1] = ((axis_requested_state  & BIT_MASK_1 )>> 8 );
+	tx_msg.cframe.data[2] = ((axis_requested_state  & BIT_MASK_2 )>> 16);
+	tx_msg.cframe.data[3] = ((axis_requested_state  & BIT_MASK_3 )>> 24);	
+	can_write();
 }
 
 void controller::move_to_pos(uint32_t node_id, int32_t pos)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = move_to_pos_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = pos & BIT_MASK_0;
-	this->tx_msg.socket_can.data[1] = (pos & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (pos & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (pos & BIT_MASK_3) << 24;	
+	this->tx_msg.cmd_id = MOVE_TO_POS;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.data[0] = pos & BIT_MASK_0;
+	this->tx_msg.cframe.data[1] = (pos & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = (pos & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = (pos & BIT_MASK_3) >> 24;	
+	can_write();
 }
 
 void controller::set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, int16_t vel_ff,int16_t current_ff)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_pos_setpoint_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = (pos_setpoint & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = (pos_setpoint & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = (pos_setpoint & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = (pos_setpoint & BIT_MASK_3) << 24;	
+	this->tx_msg.cmd_id = SET_POS_SETPOINT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.data[0] = (pos_setpoint & BIT_MASK_0);
+	this->tx_msg.cframe.data[1] = (pos_setpoint & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = (pos_setpoint & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = (pos_setpoint & BIT_MASK_3) >> 24;	
 
-	this->tx_msg.socket_can.data[4] = ((vel_ff*10) & BIT_MASK_0);	
-	this->tx_msg.socket_can.data[5] = ((vel_ff*10) & BIT_MASK_1) << 8;	
+	this->tx_msg.cframe.data[4] = ((vel_ff*10) & BIT_MASK_0);	
+	this->tx_msg.cframe.data[5] = ((vel_ff*10) & BIT_MASK_1) >> 8;	
 	
-	this->tx_msg.socket_can.data[6] = ((current_ff*100) & BIT_MASK_0);	
-	this->tx_msg.socket_can.data[7] = ((current_ff*100) & BIT_MASK_1) << 8;	
+	this->tx_msg.cframe.data[6] = ((current_ff*100) & BIT_MASK_0);	
+	this->tx_msg.cframe.data[7] = ((current_ff*100) & BIT_MASK_1) >> 8;	
+	can_write();
 	
 }
 
 void controller::set_vel_setpoint(uint32_t node_id, int32_t vel_setpoint , int16_t current_ff)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_vel_setpoint_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = ((vel_setpoint*100) & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = ((vel_setpoint*100) & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = ((vel_setpoint*100) & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = ((vel_setpoint*100) & BIT_MASK_3) << 24;
+	this->tx_msg.cmd_id = SET_VEL_SETPOINT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.data[0] = ((vel_setpoint*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[1] = ((vel_setpoint*100) & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = ((vel_setpoint*100) & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = ((vel_setpoint*100) & BIT_MASK_3) >> 24;
 
-	this->tx_msg.socket_can.data[4] = ((current_ff*100) & BIT_MASK_0);
-	this->tx_msg.socket_can.data[5] = ((current_ff*100) & BIT_MASK_1) << 8;
-
-	
-	
+	this->tx_msg.cframe.data[4] = ((current_ff*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[5] = ((current_ff*100) & BIT_MASK_1) >> 8;
+	can_write();
 }
 
 void controller::set_cur_setpoint(uint32_t node_id, int32_t cur_setpoint)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_cur_setpoint_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.socket_can.data[0] = ((cur_setpoint*100) & BIT_MASK_0);
-	this->tx_msg.socket_can.data[1] = ((cur_setpoint*100) & BIT_MASK_1) << 8;
-	this->tx_msg.socket_can.data[2] = ((cur_setpoint*100) & BIT_MASK_2) << 16;
-	this->tx_msg.socket_can.data[3] = ((cur_setpoint*100) & BIT_MASK_3) << 24;	
+	this->tx_msg.cmd_id = SET_CUR_SETPOINT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.data[0] = ((cur_setpoint*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[1] = ((cur_setpoint*100) & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = ((cur_setpoint*100) & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = ((cur_setpoint*100) & BIT_MASK_3) >> 24;
+	can_write();	
 	
 }
 
 void controller::set_vel_limit(uint32_t node_id, float vel_limit)  /*FLOAT*/
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_vel_limit_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-
-	float2Bytes(vel_limit, this->tx_msg.socket_can.data);
-	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
-	// this->tx_msg.socket_can.data[0] = (vel_limit & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[1] = (vel_limit & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[2] = (vel_limit & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[3] = (vel_limit & BIT_MASK_3) << 24;	
-	
+	this->tx_msg.cmd_id = SET_VEL_LIMIT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+		
+	float2Bytes(vel_limit, tx_msg.cframe.data);
+	printf("inside class to %x of size %d of socket %d:cframe.data is %x %x %x %x\n", tx_msg.cframe.can_id, tx_msg.cframe.can_dlc, socket_file_handler, tx_msg.cframe.data[0], tx_msg.cframe.data[1], tx_msg.cframe.data[2],tx_msg.cframe.data[3]);
+  	can_write();
 }
 void controller::start_anticogging(uint32_t node_id)
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = start_anti_cogging_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = START_ANTI_COGGING;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 	
+	can_write();	
 }
 void controller::set_traj_vel_limit(uint32_t node_id , float traj_vel_limit) /*FLOAT*/
 {
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_traj_vel_limit_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = SET_TRAJ_VEL_LIMIT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	float2Bytes(traj_vel_limit, this->tx_msg.socket_can.data);
-	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
-
-	// this->tx_msg.socket_can.data[0] = (traj_vel_limit & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[1] = (traj_vel_limit & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[2] = (traj_vel_limit & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[3] = (traj_vel_limit & BIT_MASK_3) << 24;	
+	float2Bytes(traj_vel_limit, this->tx_msg.cframe.data);
 	
+	can_write();	
 }
 
 void controller::set_traj_accel_limit(uint32_t node_id , float accel_limit, float decel_limit)  /*FLOAT*/
 {
-	
+	u_int8_t bytes_temp[4];
+
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_traj_accel_limit_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = SET_TRAJ_ACCEL_LIMIT;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	float2Bytes(accel_limit, this->tx_msg.socket_can.data);
-	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
-	float2Bytes(decel_limit, &this->tx_msg.socket_can.data[4]);
-	rvereseArray(this->tx_msg.socket_can.data, 4, 7);
+	float2Bytes(accel_limit, this->tx_msg.cframe.data);
+	float2Bytes(decel_limit, &(this->tx_msg.cframe.data[4]));
 
+	can_write();	
 
-	// this->tx_msg.socket_can.data[0] = (accel_limit & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[1] = (accel_limit & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[2] = (accel_limit & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[3] = (accel_limit & BIT_MASK_3) << 24;	
-
-	// this->tx_msg.socket_can.data[4] = (decel_limit & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[5] = (decel_limit & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[6] = (decel_limit & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[7] = (decel_limit & BIT_MASK_3) << 24;	
-	
-	
 }
 
 void controller::set_traj_a_per_css(uint32_t node_id , float traj_a_per_css) /*FLOAT*/
 {
 	
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_traj_a_per_css_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = SET_TRAJ_A_PER_CSS;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	float2Bytes(traj_a_per_css, this->tx_msg.socket_can.data);
-	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
-
-	// this->tx_msg.socket_can.data[0] = (traj_a_per_css & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[1] = (traj_a_per_css & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[2] = (traj_a_per_css & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[3] = (traj_a_per_css & BIT_MASK_3) << 24;	
+	float2Bytes(traj_a_per_css, this->tx_msg.cframe.data);
 			
+	can_write();	
 	
 }
 
@@ -332,48 +325,33 @@ void controller::reboot_odrive(uint32_t node_id)
 {
 	
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = reboot_odrive_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);	
+	this->tx_msg.cmd_id = REBOOT_ODRIVE;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);	
 		
+	can_write();	
 }
 
 void controller::get_vbus_voltage(uint32_t node_id)
 {
 	
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = get_vbus_voltage_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = GET_VBUS_VOLTAGE;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 		
-	
+	can_write();	
 }
 void controller::set_vel_pi_gain(uint32_t node_id, float vel_p_gain, float vel_i_gain)  /*FLOAT*/
 {
 	
 	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = set_vel_pi_gain_cmd;
-	this->tx_msg.socket_can.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cmd_id = SET_VEL_PI_GAIN;
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 
-	float2Bytes(vel_p_gain, this->tx_msg.socket_can.data);
-	rvereseArray(this->tx_msg.socket_can.data, 0, 3);
-	float2Bytes(vel_i_gain, &this->tx_msg.socket_can.data[4]);
-	rvereseArray(this->tx_msg.socket_can.data, 4, 7);
+	float2Bytes(vel_p_gain, this->tx_msg.cframe.data);
+	float2Bytes(vel_i_gain, &(this->tx_msg.cframe.data[4]));
 
-
-	// this->tx_msg.socket_can.data[0] = (vel_p_gain & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[1] = (vel_p_gain & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[2] = (vel_p_gain & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[3] = (vel_p_gain & BIT_MASK_3) << 24;
-
-	// this->tx_msg.socket_can.data[4] = (vel_i_gain & BIT_MASK_0);
-	// this->tx_msg.socket_can.data[5] = (vel_i_gain & BIT_MASK_1) << 8;
-	// this->tx_msg.socket_can.data[6] = (vel_i_gain & BIT_MASK_2) << 16;
-	// this->tx_msg.socket_can.data[7] = (vel_i_gain & BIT_MASK_3) << 24;			
-	
+	can_write();	
 }
-
-
-
-
 
 
 
