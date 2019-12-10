@@ -1,7 +1,7 @@
-#include<controller.hpp>
+#include"controller.hpp"
 int main()
 {
-	//create controller object;
+/*	//create controller object;
 	controller ctrl();
 	struct sockaddr_can addr; //socket can adress
 	struct ifreq ifr; //interface structure
@@ -27,9 +27,9 @@ int main()
 	//bind the socket to the can file handler
 	if(bind(ctrl.socket_file_handler, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		perror("Error in socket bind");
-		return -2;
+		return -2;*/
+
+	return 0;
 	}
 
 
-	ctrl.can_read();
-	ctrl.can_write();

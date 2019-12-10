@@ -1,16 +1,5 @@
 #include<odrive_can_functions.hpp>
 
-#define rtr 1;
-
-#define BIT_MASK_0 0xFF;
-#define BIT_MASK_1 0xFF00;
-#define BIT_MASK_2 0xFF0000;
-#define BIT_MASK_3 0xFF000000;
-#define BIT_MASK_4 0xFF00000000;
-#define BIT_MASK_5 0xFF00000000;
-#define BIT_MASK_6 0xFF0000000000;
-#define BIT_MASK_7 0xFF000000000000;
-
 #define FRONT_LEFT_LEG   
 #define FRONT_RIGHT_LEG
 #define BACK_LEFT_LEG
@@ -20,15 +9,13 @@
 #define NO_OF_LIMB 4 
 #define NO_OF_STANCE 4
 
-
-
 using namespace std;
 //define command ids
 
 class motion{
 
 public:
-	void motion();
+	motion();
 
 	void initializeBot();
 	void retrievedata();
@@ -47,7 +34,6 @@ public:
 
 
 	void storebuffer();
-	void sendData();
 
 
 
@@ -73,7 +59,6 @@ private:
 
 	int i;
 	controller pc104;
-	request_msg msgreq;
 	FILE *fptr;
 
-}
+};
