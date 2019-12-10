@@ -21,10 +21,13 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 	Leg 2 (Knee -7 Abduction -8 Hip -9)
 	Leg 3 (Knee -10 Abduction -11 Hip -12)*/
 
-	if(msg.node_id%3 == 1) /* knee motor */
+	uint32_t part = msg.node_id%3;
+	
+	switch (part){
+	case 1: /* knee motor */
+		
+		for (int i = 1; i < 5; ++i)
 		{
-			for (int i = 1; i < 5; ++i)
-			{
 				if((msg.node_id+2)/3 ==i) 
 			{
 				legs[i-1][0].axis_can_node_id = 3*i-2; 
@@ -32,14 +35,14 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 				msg.idn.type_no = 0;
 			}
 
-			}		
-		}
-
-		else if(msg.node_id%3 == 2) /* abduction motor */
-		{
+		}		
+		
+		break;
+	case 2: /* abduction motor */
+		
 			
-			for (int i = 1; i < 5; ++i)
-			{
+		for (int i = 1; i < 5; ++i)
+		{
 				if((msg.node_id+1)/3 ==i) 
 			{
 				legs[i-1][1].axis_can_node_id = 3*i-1; 
@@ -47,15 +50,13 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 				msg.idn.type_no = 1;
 			}
 
-			}	
+		}	
+		break;
 
-		} 
-
-
-		else if(msg.node_id%3 == 0)  /* hip motor */
+	case 0:  /* hip motor */
+		
+		for (int i = 1; i < 5; ++i)
 		{
-			for (int i = 1; i < 5; ++i)
-			{
 				if((msg.node_id)/3 ==i) 
 			{
 				legs[i-1][2].axis_can_node_id = 3*i; 
@@ -63,15 +64,16 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 				msg.idn.type_no = 2;
 			}
 
-			}
-
-		} 
-		else
-		{
-			cout<<"CAN Node ID sorting failed" <<endl;
 		}
+		break; 
+	default:
+		
+		cout<<"CAN Node ID sorting failed" <<endl;
+		
+	}
 
 }
+
 
 /*architecture dependent float to byte converter (Endian-ness)
 */
@@ -81,7 +83,7 @@ void float2Bytes(float float_variable, uint8_t * bytes_temp){
     uint8_t bytes[4];
   } thing;
   thing.a = float_variable;
-  // memcpy(bytes_temp, thing.bytes, 4);
+  memcpy(bytes_temp, thing.bytes, 4);
 }
 
 /*architecture dependent byte to float converter (Endian-ness)
@@ -98,7 +100,8 @@ void float2Bytes(float float_variable, uint8_t * bytes_temp){
   *(float_variable) = thing.a;
 }
 
-/* Function to reverse arr[] from start to end*/
+
+/* Function to reverse arr[] from start to end
 void rvereseArray(auto arr[], int start, int end) 
 { 
     while (start < end) 
@@ -111,3 +114,4 @@ void rvereseArray(auto arr[], int start, int end)
     }  
 }      
   
+*/

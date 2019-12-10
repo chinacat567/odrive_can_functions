@@ -8,39 +8,44 @@
 #include<stdint.h>
 #include<iostream>
 
+#ifndef _CF_H_
+#define _CF_H_
 
-#define rtr 1
+#define RTR 1
 
 #define BIT_MASK_0 0xFF
 #define BIT_MASK_1 0xFF00
 #define BIT_MASK_2 0xFF0000
 #define BIT_MASK_3 0xFF000000
+#define BIT_MASK_4 0xFF00000000
+#define BIT_MASK_5 0xFF0000000000
+#define BIT_MASK_6 0xFF000000000000
+#define BIT_MASK_7 0xFF00000000000000
 
 using namespace std;
 //define command ids
 
-const uint32_t odrive_heartbeat_cmd = 1;
-const uint32_t estop_cmd = 2;
-const uint32_t get_motor_error_cmd = 3;/*implemented in request_msg*/
-const uint32_t get_encoder_error_cmd = 4;/*implemented in request_msg*/
-const uint32_t set_axis_node_id_cmd = 6;
-const uint32_t set_axis_requested_state_cmd = 7;
-const uint32_t get_encoder_estimate_cmd = 9; /*implemented in request_msg*/
-const uint32_t get_encoder_counts_cmd = 10; /*implemented in request_msg*/
-const uint32_t move_to_pos_cmd = 11;
-const uint32_t set_pos_setpoint_cmd = 12;
-const uint32_t set_vel_setpoint_cmd = 13;
-const uint32_t set_cur_setpoint_cmd = 14;
-const uint32_t set_vel_limit_cmd = 15;
-const uint32_t start_anti_cogging_cmd = 16;
-const uint32_t set_traj_vel_limit_cmd = 17;
-const uint32_t set_traj_accel_limit_cmd = 18;
-const uint32_t set_traj_a_per_css_cmd = 19;
-const uint32_t get_iq_values_cmd = 20; /*implemented in request_msg*/
-const uint32_t reboot_odrive_cmd = 22;
-const uint32_t get_vbus_voltage_cmd = 23; /*implemented in request_msg*/
-const uint32_t set_vel_pi_gain_cmd = 24;
-
+#define ODRIVE_HEARTBEAT        1
+#define ESTOP                   2
+#define GET_MOTOR_ERROR         3/*IMPLEMENTED IN REQUEST_MSG*/
+#define GET_ENCODER_ERROR       4/*IMPLEMENTED IN REQUEST_MSG*/
+#define SET_AXIS_NODE_ID        6
+#define SET_AXIS_REQUESTED_STATE  7
+#define GET_ENCODER_ESTIMATE    9 /*IMPLEMENTED IN REQUEST_MSG*/
+#define GET_ENCODER_COUNTS      10 /*IMPLEMENTED IN REQUEST_MSG*/
+#define MOVE_TO_POS             11
+#define SET_POS_SETPOINT        12
+#define SET_VEL_SETPOINT        13
+#define SET_CUR_SETPOINT        14
+#define SET_VEL_LIMIT           15
+#define START_ANTI_COGGING      16
+#define SET_TRAJ_VEL_LIMIT      17
+#define SET_TRAJ_ACCEL_LIMIT    18
+#define SET_TRAJ_A_PER_CSS      19
+#define GET_IQ_VALUES           20 /*IMPLEMENTED IN REQUEST_MSG*/
+#define REBOOT_ODRIVE           22
+#define GET_VBUS_VOLTAGE        23 /*IMPLEMENTED IN REQUEST_MSG*/
+#define SET_VEL_PI_GAIN         24
 
 
 /* struct for storing the motor data points */
@@ -87,28 +92,28 @@ struct identifier
 
 struct can_frame_odrive
 {
-        can_frame socket_can;
+        can_frame cframe;
         uint32_t node_id;
         uint32_t cmd_id;
         identifier idn;
 };
 
+
 class controller{
 
 public:
     /*constructor*/
-    controller();
+    controller(int);
+
     virtual ~controller() {};
     
     /* method to write tx_msg class member on the CAN BUS*/
-    bool can_write();
+    int can_write();
     /*  method to read data from the CAN BUS and populate rx_data class member*/
-    bool can_read();
+    int can_read();
     /* msg handling method to manage incoming data and poulate member variables accordingly*/
     void msg_handler();
-    /* method to set the socketcan filehandler*/
-    void set_socket(int socket_file_handler);
- 
+    
     /* methods that set ODrive parameters*/
     void estop(uint32_t node_id);
     void set_axis_node_id(uint32_t node_id, uint16_t axis_can_node_id);
@@ -153,6 +158,7 @@ private:
 };
 
 
+#endif /* _CF_H_ */
 
 
 
