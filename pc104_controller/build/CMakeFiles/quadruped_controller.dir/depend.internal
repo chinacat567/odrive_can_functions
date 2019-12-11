@@ -3,6 +3,6 @@
 
 CMakeFiles/quadruped_controller.dir/src/controller.cpp.o
  ../include/controller.hpp
- ../include/motion_controller.hpp
+ ../include/misc_functions.hpp
  ../include/odrive_can_functions.hpp
  /home/codecraft94/Documents/quadruped/pc104_controller/src/controller.cpp

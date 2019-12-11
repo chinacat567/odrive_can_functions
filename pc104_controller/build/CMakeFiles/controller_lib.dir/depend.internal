@@ -5,8 +5,6 @@ CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o
  ../include/misc_functions.hpp
  ../include/odrive_can_functions.hpp
  /home/codecraft94/Documents/quadruped/pc104_controller/src/misc_functions.cpp
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o
- /home/codecraft94/Documents/quadruped/pc104_controller/src/motion_controller.cpp
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o
  ../include/misc_functions.hpp
  ../include/odrive_can_functions.hpp

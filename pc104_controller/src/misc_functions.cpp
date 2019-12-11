@@ -6,8 +6,8 @@ void bit_masking(can_frame_odrive &can_frame)
 	
 	__u32 cmd_id_mask = 0x1F;
 	__u32 node_id_mask = 0x7E0;
-	can_frame.cmd_id = (cmd_id_mask & can_frame.socket_can.can_id) ;
-	can_frame.node_id = (node_id_mask & can_frame.socket_can.can_id) >> 5;	
+	can_frame.cmd_id = (cmd_id_mask & can_frame.cframe.can_id) ;
+	can_frame.node_id = (node_id_mask & can_frame.cframe.can_id) >> 5;	
     
 }
 
