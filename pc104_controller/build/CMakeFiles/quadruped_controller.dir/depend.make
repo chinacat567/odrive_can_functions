@@ -4,5 +4,6 @@
 CMakeFiles/quadruped_controller.dir/src/controller.cpp.o: ../include/controller.hpp
 CMakeFiles/quadruped_controller.dir/src/controller.cpp.o: ../include/misc_functions.hpp
 CMakeFiles/quadruped_controller.dir/src/controller.cpp.o: ../include/odrive_can_functions.hpp
+CMakeFiles/quadruped_controller.dir/src/controller.cpp.o: ../include/periodic_task.hpp
 CMakeFiles/quadruped_controller.dir/src/controller.cpp.o: ../src/controller.cpp
 

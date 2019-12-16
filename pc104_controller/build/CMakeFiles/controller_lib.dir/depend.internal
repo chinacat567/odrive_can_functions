@@ -9,3 +9,11 @@ CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o
  ../include/misc_functions.hpp
  ../include/odrive_can_functions.hpp
  /home/codecraft94/Documents/quadruped/pc104_controller/src/odrive_can_functions.cpp
+CMakeFiles/controller_lib.dir/src/periodic_task.cpp.o
+ ../include/odrive_can_functions.hpp
+ ../include/periodic_task.hpp
+ /home/codecraft94/Documents/quadruped/pc104_controller/src/periodic_task.cpp
+CMakeFiles/controller_lib.dir/src/request_msg.cpp.o
+ ../include/odrive_can_functions.hpp
+ ../include/request_msg.hpp
+ /home/codecraft94/Documents/quadruped/pc104_controller/src/request_msg.cpp
