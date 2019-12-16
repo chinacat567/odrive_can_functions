@@ -7,12 +7,48 @@
 #IncludeRegexTransform: 
 
 ../include/controller.hpp
-motion_controller.hpp
-../include/motion_controller.hpp
-
-../include/motion_controller.hpp
-odrive_can_functions.hpp
+limits.h
 -
+pthread.h
+-
+sched.h
+-
+stdio.h
+-
+stdlib.h
+-
+sys/mman.h
+-
+sys/socket.h
+-
+unistd.h
+-
+string.h
+-
+linux/can.h
+-
+linux/can/raw.h
+-
+sys/types.h
+-
+net/if.h
+-
+sys/ioctl.h
+-
+errno.h
+-
+stdint.h
+-
+odrive_can_functions.hpp
+../include/odrive_can_functions.hpp
+misc_functions.hpp
+../include/misc_functions.hpp
+
+../include/misc_functions.hpp
+cstring
+-
+odrive_can_functions.hpp
+../include/odrive_can_functions.hpp
 
 ../include/odrive_can_functions.hpp
 linux/can.h
@@ -36,5 +72,5 @@ iostream
 
 /home/codecraft94/Documents/quadruped/pc104_controller/src/controller.cpp
 controller.hpp
-/home/codecraft94/Documents/quadruped/pc104_controller/src/controller.hpp
+-
 

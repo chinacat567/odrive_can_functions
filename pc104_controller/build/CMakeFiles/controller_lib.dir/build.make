@@ -83,34 +83,19 @@ CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/codecraft94/Documents/quadruped/pc104_controller/src/odrive_can_functions.cpp -o CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.s
 
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o: CMakeFiles/controller_lib.dir/flags.make
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o: ../src/motion_controller.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/codecraft94/Documents/quadruped/pc104_controller/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o -c /home/codecraft94/Documents/quadruped/pc104_controller/src/motion_controller.cpp
-
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/controller_lib.dir/src/motion_controller.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/codecraft94/Documents/quadruped/pc104_controller/src/motion_controller.cpp > CMakeFiles/controller_lib.dir/src/motion_controller.cpp.i
-
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/controller_lib.dir/src/motion_controller.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/codecraft94/Documents/quadruped/pc104_controller/src/motion_controller.cpp -o CMakeFiles/controller_lib.dir/src/motion_controller.cpp.s
-
 # Object files for target controller_lib
 controller_lib_OBJECTS = \
 "CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o" \
-"CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o" \
-"CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o"
+"CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o"
 
 # External object files for target controller_lib
 controller_lib_EXTERNAL_OBJECTS =
 
 libcontroller_lib.a: CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o
 libcontroller_lib.a: CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o
-libcontroller_lib.a: CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o
 libcontroller_lib.a: CMakeFiles/controller_lib.dir/build.make
 libcontroller_lib.a: CMakeFiles/controller_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/codecraft94/Documents/quadruped/pc104_controller/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libcontroller_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/codecraft94/Documents/quadruped/pc104_controller/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libcontroller_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/controller_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/controller_lib.dir/link.txt --verbose=$(VERBOSE)
 

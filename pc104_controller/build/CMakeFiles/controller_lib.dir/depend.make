@@ -5,8 +5,6 @@ CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o: ../include/misc_function
 CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o: ../include/odrive_can_functions.hpp
 CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o: ../src/misc_functions.cpp
 
-CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o: ../src/motion_controller.cpp
-
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../include/misc_functions.hpp
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../include/odrive_can_functions.hpp
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../src/odrive_can_functions.cpp

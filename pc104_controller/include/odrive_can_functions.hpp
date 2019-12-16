@@ -103,14 +103,14 @@ class controller{
 
 public:
     /*constructor*/
-    controller(int);
+    controller(int socket_fd);
 
     virtual ~controller() {};
     
     /* method to write tx_msg class member on the CAN BUS*/
-    int can_write();
+    bool can_write();
     /*  method to read data from the CAN BUS and populate rx_data class member*/
-    int can_read();
+    bool can_read();
     /* msg handling method to manage incoming data and poulate member variables accordingly*/
     void msg_handler();
     

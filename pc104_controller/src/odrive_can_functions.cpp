@@ -12,11 +12,11 @@ controller::controller(int socket_fd)
 	/*initialize rx and tx can messages structs*/
 	for (int i = 0; i < 7; ++i)
 	{
-		this->tx_msg.socket_can.data[i] = 0;
-		this->rx_msg.socket_can.data[i] = 0;
+		this->tx_msg.cframe.data[i] = 0;
+		this->rx_msg.cframe.data[i] = 0;
 	}
-	this->tx_msg.socket_can.can_dlc = 8; 
-	this->rx_msg.socket_can.can_dlc = 8; 
+	this->tx_msg.cframe.can_dlc = 8; 
+	this->rx_msg.cframe.can_dlc = 8; 
 	socket_file_handler = socket_fd;
 	
 	this->signit_handler = true;
@@ -67,15 +67,15 @@ void controller::msg_handler()
 	leg_no = this->rx_msg.idn.leg_no;
 	type_no = this->rx_msg.idn.type_no;
 
-	a = this->rx_msg.socket_can.data[0];
-	b = this->rx_msg.socket_can.data[1];
-	c = this->rx_msg.socket_can.data[2];
-	d = this->rx_msg.socket_can.data[3];
+	a = this->rx_msg.cframe.data[0];
+	b = this->rx_msg.cframe.data[1];
+	c = this->rx_msg.cframe.data[2];
+	d = this->rx_msg.cframe.data[3];
 
-	e = this->rx_msg.socket_can.data[4];
-	f = this->rx_msg.socket_can.data[5];
-	g = this->rx_msg.socket_can.data[6];
-	h = this->rx_msg.socket_can.data[7];
+	e = this->rx_msg.cframe.data[4];
+	f = this->rx_msg.cframe.data[5];
+	g = this->rx_msg.cframe.data[6];
+	h = this->rx_msg.cframe.data[7];
 
 	/*read the received can frame*/
 	switch(this->rx_msg.cmd_id)

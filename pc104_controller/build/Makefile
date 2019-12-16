@@ -190,33 +190,6 @@ src/misc_functions.cpp.s:
 	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/misc_functions.cpp.s
 .PHONY : src/misc_functions.cpp.s
 
-src/motion_controller.o: src/motion_controller.cpp.o
-
-.PHONY : src/motion_controller.o
-
-# target to build an object file
-src/motion_controller.cpp.o:
-	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/motion_controller.cpp.o
-.PHONY : src/motion_controller.cpp.o
-
-src/motion_controller.i: src/motion_controller.cpp.i
-
-.PHONY : src/motion_controller.i
-
-# target to preprocess a source file
-src/motion_controller.cpp.i:
-	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/motion_controller.cpp.i
-.PHONY : src/motion_controller.cpp.i
-
-src/motion_controller.s: src/motion_controller.cpp.s
-
-.PHONY : src/motion_controller.s
-
-# target to generate assembly for a file
-src/motion_controller.cpp.s:
-	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/motion_controller.cpp.s
-.PHONY : src/motion_controller.cpp.s
-
 src/odrive_can_functions.o: src/odrive_can_functions.cpp.o
 
 .PHONY : src/odrive_can_functions.o
@@ -260,9 +233,6 @@ help:
 	@echo "... src/misc_functions.o"
 	@echo "... src/misc_functions.i"
 	@echo "... src/misc_functions.s"
-	@echo "... src/motion_controller.o"
-	@echo "... src/motion_controller.i"
-	@echo "... src/motion_controller.s"
 	@echo "... src/odrive_can_functions.o"
 	@echo "... src/odrive_can_functions.i"
 	@echo "... src/odrive_can_functions.s"
