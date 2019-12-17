@@ -7,7 +7,7 @@ include_directories(include)
 add_library(controller_lib
 		src/misc_functions.cpp
 		src/odrive_can_functions.cpp
-# 		src/motion_controller.cpp
+ 		src/periodic_task.cpp
 )
 
 add_definitions(-std=c++17)

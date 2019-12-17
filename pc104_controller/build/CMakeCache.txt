@@ -201,12 +201,6 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-bug_flood_BINARY_DIR:STATIC=/home/codecraft94/Documents/quadruped/pc104_controller/build
-
-//Value Computed by CMake
-bug_flood_SOURCE_DIR:STATIC=/home/codecraft94/Documents/quadruped/pc104_controller
-
-//Value Computed by CMake
 nus_quadruped_BINARY_DIR:STATIC=/home/codecraft94/Documents/quadruped/pc104_controller/build
 
 //Value Computed by CMake

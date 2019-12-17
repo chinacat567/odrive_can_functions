@@ -217,6 +217,33 @@ src/odrive_can_functions.cpp.s:
 	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.s
 .PHONY : src/odrive_can_functions.cpp.s
 
+src/periodic_task.o: src/periodic_task.cpp.o
+
+.PHONY : src/periodic_task.o
+
+# target to build an object file
+src/periodic_task.cpp.o:
+	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/periodic_task.cpp.o
+.PHONY : src/periodic_task.cpp.o
+
+src/periodic_task.i: src/periodic_task.cpp.i
+
+.PHONY : src/periodic_task.i
+
+# target to preprocess a source file
+src/periodic_task.cpp.i:
+	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/periodic_task.cpp.i
+.PHONY : src/periodic_task.cpp.i
+
+src/periodic_task.s: src/periodic_task.cpp.s
+
+.PHONY : src/periodic_task.s
+
+# target to generate assembly for a file
+src/periodic_task.cpp.s:
+	$(MAKE) -f CMakeFiles/controller_lib.dir/build.make CMakeFiles/controller_lib.dir/src/periodic_task.cpp.s
+.PHONY : src/periodic_task.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -236,6 +263,9 @@ help:
 	@echo "... src/odrive_can_functions.o"
 	@echo "... src/odrive_can_functions.i"
 	@echo "... src/odrive_can_functions.s"
+	@echo "... src/periodic_task.o"
+	@echo "... src/periodic_task.i"
+	@echo "... src/periodic_task.s"
 .PHONY : help
 
 

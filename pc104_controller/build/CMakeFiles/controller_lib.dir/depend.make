@@ -9,3 +9,7 @@ CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../include/misc_fu
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../include/odrive_can_functions.hpp
 CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o: ../src/odrive_can_functions.cpp
 
+CMakeFiles/controller_lib.dir/src/periodic_task.cpp.o: ../include/odrive_can_functions.hpp
+CMakeFiles/controller_lib.dir/src/periodic_task.cpp.o: ../include/periodic_task.hpp
+CMakeFiles/controller_lib.dir/src/periodic_task.cpp.o: ../src/periodic_task.cpp
+

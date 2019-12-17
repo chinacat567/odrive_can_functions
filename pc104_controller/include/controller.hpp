@@ -14,40 +14,15 @@
 #include <net/if.h>	
 #include <sys/ioctl.h>
 #include <errno.h>
-#include<stdint.h>
+#include <stdint.h>
+#include <fcntl.h>
 
 
 #include"odrive_can_functions.hpp"
 #include"misc_functions.hpp"
-
-struct canArg { 
-
-	//for grabbing up to 2 socket info.
-
-	struct can_frame frame,frame2;
-	int socket,socket2;
-};
-
-struct period_info {
-  struct timespec next_period;
-  long period_ns;
-};
-
-struct timespec curtime;
+#include"periodic_task.hpp"
 
 
-int can_init(struct canArg *canArg1,struct canArg *canArg4);
 
-static void inc_period(struct period_info *pinfo);	
+int can_init(struct threadArg &canArg1,struct threadArg &canArg4);
 
-static void periodic_task_init(struct period_info *pinfo);
-
-static void wait_rest_of_period(struct period_info *pinfo);
-
-static void do_rt_task(struct canArg *data);
-
-void *thread_func(void *data);
-
-static void do_rt_task2(struct canArg *data);
-
-void *thread_func2(void *data);
