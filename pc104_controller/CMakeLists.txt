@@ -13,11 +13,7 @@ add_library(controller_lib
 
 add_definitions(-std=c++17)
 
-# add_executable(quadruped_controller src/controller.cpp)
-# add_dependencies(quadruped_controller controller_lib)
-# target_link_libraries(quadruped_controller controller_lib pthread)
-
-add_executable(rtr_test src/rtr_test.cpp)
-add_dependencies(rtr_test controller_lib)
-target_link_libraries(rtr_test controller_lib pthread)
+add_executable(quadruped_controller src/controller.cpp)
+add_dependencies(quadruped_controller controller_lib)
+target_link_libraries(quadruped_controller controller_lib pthread)
 
