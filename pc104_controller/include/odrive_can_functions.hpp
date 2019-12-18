@@ -23,8 +23,29 @@
 #define BIT_MASK_7 0xFF00000000000000
 
 using namespace std;
-//define command ids
 
+// define motor array index
+#define NO_OF_MOTOR       12
+
+#define FRONT_LEFT_KNEE       1
+#define FRONT_LEFT_HIP        2
+#define FRONT_LEFT_ABDUCTION  3
+#define FRONT_RIGHT_KNEE      4
+#define FRONT_RIGHT_HIP       5
+#define FRONT_RIGHT_ABDUCTION 6
+#define BACK_LEFT_KNEE        7
+#define BACK_LEFT_HIP         8
+#define BACK_LEFT_ABDUCTION   9
+#define BACK_RIGHT_KNEE       10
+#define BACK_RIGHT_HIP        11
+#define BACK_RIGHT_ABDUCTION  12
+
+#define CLAW_LEFT_1        13
+#define CLAW_LEFT_2        14
+#define CLAW_RIGHT_1       15
+#define CLAW_RIGHT_2       16
+
+//define command ids
 #define ODRIVE_HEARTBEAT        1
 #define ESTOP                   2
 #define GET_MOTOR_ERROR         3/*IMPLEMENTED IN REQUEST_MSG*/
@@ -83,19 +104,12 @@ struct odrive_motor
     float velocity_i_gain; 
 };
 
-struct identifier
-{
-    int leg_no; /* leg_no identifier*/
-    int type_no; /* type_no identifier 0-knee, 1-abduction, 2-hip*/
-};
-
-
 struct can_frame_odrive
 {
         can_frame cframe;
         uint32_t node_id;
         uint32_t cmd_id;
-        identifier idn;
+        int index;
 };
 
 
@@ -133,7 +147,7 @@ public:
 
 
     /* accessor methods : used for accessing private class members from outside the class*/
-    odrive_motor get_motor_data(int x, int y);
+    odrive_motor get_motor_data(int x);
 
     /*MULTITHREADING FUNCTIONS*/
     void set_mutex_lock(pthread_mutex_t &lock);
@@ -148,7 +162,7 @@ private:
     int socket_file_handler;
     pthread_t thread;
    /*'legs' member variable, contains motor data for all the 12 motors*/
-    odrive_motor legs[4][3];
+    odrive_motor motors[NO_OF_MOTOR];
     bool signit_handler;
     pthread_mutex_t mutex_lock;
     /* thread function that runs an infinite loop*/

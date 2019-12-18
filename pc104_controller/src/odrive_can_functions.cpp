@@ -11,7 +11,7 @@ controller::controller(int socket_fd)
 	
 	/*initialize rx and tx can messages structs*/
 	for (int i = 0; i < 7; ++i)
-	{
+	{	
 		this->tx_msg.cframe.data[i] = 0;
 		this->rx_msg.cframe.data[i] = 0;
 	}
@@ -58,14 +58,8 @@ bool controller::can_write()
 
 void controller::msg_handler()
 {
-
-	bit_masking(this->rx_msg); /*get node id, cmd id*/
-	sort_can_node_id(this->legs,this->rx_msg); /*assign node id to respective leg*/
 	uint8_t a,b,c,d,e,f,g,h; /*temp storage variale for the CAN data packets*/
-	int leg_no, type_no; /*temp storage variables for leg_no and type_no*/
-
-	leg_no = this->rx_msg.idn.leg_no;
-	type_no = this->rx_msg.idn.type_no;
+	int i;
 
 	a = this->rx_msg.cframe.data[0];
 	b = this->rx_msg.cframe.data[1];
@@ -78,32 +72,34 @@ void controller::msg_handler()
 	h = this->rx_msg.cframe.data[7];
 
 	/*read the received can frame*/
+
+	i = rx_msg.node_id;
 	switch(this->rx_msg.cmd_id)
 	{
-		case '1': /*hearbeat message*/
-			this->legs[leg_no][type_no].axis_error = (a | b << 8 | c << 16 | d << 24);
-			this->legs[leg_no][type_no].axis_current_state = (e | f << 8 | g << 16 | h << 24);
+		case 1: //hearbeat message
+			this->motors[i].axis_error = (a | b << 8 | c << 16 | d << 24);
+			this->motors[i].axis_current_state = (e | f << 8 | g << 16 | h << 24);
 			break;
-		case '3': /*get motor error*/
-			this->legs[leg_no][type_no].motor_error = (a | b << 8 | c << 16 | d << 24);
+		case 2: //get motor error//
+			this->motors[i].motor_error = (a | b << 8 | c << 16 | d << 24);
 			break;
-		case '4': /*get encoder error*/
-			this->legs[leg_no][type_no].encoder_error = (e | f << 8 | g << 16 | h << 24);;
+		case 4: //get encoder error
+			this->motors[i].encoder_error = (e | f << 8 | g << 16 | h << 24);;
 			break;
-		case '9': /*get encoder estimates*/
-			bytes2Float(&a, &this->legs[leg_no][type_no].encoder_pos_estimate);/*FLOAT*/
-			bytes2Float(&e, &this->legs[leg_no][type_no].encoder_vel_estimate ); /*FLOAT*/
+		case 9: //get encoder estimates
+			bytes2Float(&a, &this->motors[i].encoder_pos_estimate); //FLOAT 
+			bytes2Float(&e, &this->motors[i].encoder_vel_estimate );  //FLOAT 
 			break;
-		case '10': /*get encoder counts*/
-			this->legs[leg_no][type_no].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24); /*SIGNED INT*/
-			this->legs[leg_no][type_no].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24); /*SIGNED INT*/
+		case 10: //get encoder counts
+			this->motors[i].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24);  //SIGNED INT 
+			this->motors[i].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24);  //SIGNED INT 
 			break;
-		case '20': /*get IQ*/
-			 bytes2Float(&a, &this->legs[leg_no][type_no].iq_setpoint ); /*FLOAT*/
-			 bytes2Float(&e, &this->legs[leg_no][type_no].iq_measured ); /*FLOAT*/
+		case 20: //get IQ
+			 bytes2Float(&a, &this->motors[i].iq_setpoint );  //FLOAT 
+			 bytes2Float(&e, &this->motors[i].iq_measured );  //FLOAT 
 			break;
-		case '23':/*vbus voltage*/
-			 bytes2Float(&a, &this->legs[leg_no][type_no].vbus_voltage); /*FLOAT*/
+		case 23://vbus voltage
+			 bytes2Float(&a, &this->motors[i].vbus_voltage);  //FLOAT 
 			break;
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;
@@ -151,13 +147,13 @@ void * controller::InternalThreadEntryFunc(void * This)
 
 }
 
-odrive_motor controller::get_motor_data(int x, int y)
+odrive_motor controller::get_motor_data(int x)
  {
- 	if( x<0 || x>3 || y<0 || y>2)
+ 	if( x<0 || x>12 )
  	{
  		cout << " Invalid access" << endl ;
  	}
- 	return this->legs[x][y];
+ 	return this->motors[x];
  }
 
 
@@ -336,7 +332,7 @@ void controller::get_vbus_voltage(uint32_t node_id)
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = GET_VBUS_VOLTAGE;
-	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5| RTR<<30);
 		
 	can_write();	
 }
