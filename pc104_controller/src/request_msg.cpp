@@ -81,7 +81,7 @@ void request_msg::get_vbus_voltage(uint32_t node_id)
 int request_msg::send_msg()
 {
 	int nbytes;
-	nbytes = write(this->socket_handler, &this->write_msg, sizeof(struct can_frame));
+	nbytes = write(this->socket_handler, &this->write_msg.cframe, sizeof(struct can_frame));
 	printf("Wrote %d bytes requesting data from ODrive\n", nbytes);
 
 	if (nbytes < 0) {
