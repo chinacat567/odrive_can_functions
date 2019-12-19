@@ -86,18 +86,21 @@ void float2Bytes(float float_variable, uint8_t * bytes_temp){
   memcpy(bytes_temp, thing.bytes, 4);
 }
 
-/*architecture dependent byte to float converter (Endian-ness)
-*/void bytes2Float(uint8_t * bytes_temp, float* float_variable){ 
+//architecture dependent byte to float converter (Endian-ness)
+void bytes2Float(uint8_t * bytes_temp, float* float_variable){ 
   union {
     float a;
     uint8_t bytes[4];
   } thing;
-  //swap around for different endian
+  //swap around for different endlian
   thing.bytes[0] = bytes_temp[0];
   thing.bytes[1] = bytes_temp[1];
   thing.bytes[2] = bytes_temp[2];
   thing.bytes[3] = bytes_temp[3];
   *(float_variable) = thing.a;
+  //printf("b2f float = %f, bytes_temp: %x %x %x %x \n",thing.a, bytes_temp[0],bytes_temp[1],bytes_temp[2],bytes_temp[3]);
+  //printf("b2f *float = %f, thing.bytes: %x %x %x %x \n",*(float_variable), thing.bytes[0],thing.bytes[1],thing.bytes[2],thing.bytes[3]);
+		
 }
 
 

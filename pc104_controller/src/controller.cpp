@@ -18,7 +18,21 @@ int main()
     printf("mlockall failed: %m\n");
     exit(-2);
   }
-											
+/*
+//for debugging 
+  float f;
+  
+  struct d{
+  	float g;
+  };
+  struct d e[2];
+
+  uint8_t c[4]={0x88,0xe3,0xb0,0x41};
+
+  bytes2Float(&c[0],&e[1].g);	
+  printf("float f is %f",e[1].g);			
+*/
+
   set_periodic_task(&ctr1, &thread2, &canArg2, 2, 10000000,80);//read
   set_periodic_task(&ctr1, &thread, &canArg1, 1, 20000000,81);//write
 

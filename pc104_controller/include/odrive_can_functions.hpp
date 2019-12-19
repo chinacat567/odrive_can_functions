@@ -162,7 +162,7 @@ private:
     int write_socket;
     pthread_t thread;
    /*'legs' member variable, contains motor data for all the 12 motors*/
-    odrive_motor motors[NO_OF_MOTOR];
+    odrive_motor motors[NO_OF_MOTOR+1];
     bool signit_handler;
     pthread_mutex_t mutex_lock;
     /* thread function that runs an infinite loop*/

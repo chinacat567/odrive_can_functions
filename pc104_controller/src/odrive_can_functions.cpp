@@ -65,13 +65,13 @@ bool controller::can_write()
 
 void controller::msg_handler()
 {
-	uint8_t a,b,c,d,e,f,g,h; /*temp storage variale for the CAN data packets*/
+	uint8_t a,b,c,d,e,f,g,h; //temp storage variale for the CAN data packets
 	int i;
-
 
 	can_read();
 	bit_masking(rx_msg);
-	a = this->rx_msg.cframe.data[0];
+
+	a = this->rx_msg.cframe.data[0];	
 	b = this->rx_msg.cframe.data[1];
 	c = this->rx_msg.cframe.data[2];
 	d = this->rx_msg.cframe.data[3];
@@ -80,6 +80,8 @@ void controller::msg_handler()
 	f = this->rx_msg.cframe.data[5];
 	g = this->rx_msg.cframe.data[6];
 	h = this->rx_msg.cframe.data[7];
+
+
 
 	/*read the received can frame*/
 	printf("node: %x cmd:%d\n", rx_msg.node_id,rx_msg.cmd_id);
@@ -97,20 +99,21 @@ void controller::msg_handler()
 			this->motors[i].encoder_error = (e | f << 8 | g << 16 | h << 24);;
 			break;
 		case 9: //get encoder estimates
-			bytes2Float(&a, &this->motors[i].encoder_pos_estimate); //FLOAT 
-			bytes2Float(&e, &this->motors[i].encoder_vel_estimate );  //FLOAT 
+			bytes2Float(&rx_msg.cframe.data[0], &this->motors[i].encoder_pos_estimate); //FLOAT 
+			bytes2Float(&rx_msg.cframe.data[4], &this->motors[i].encoder_vel_estimate );  //FLOAT 
 			break;
 		case 10: //get encoder counts
 			this->motors[i].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24);  //SIGNED INT 
 			this->motors[i].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24);  //SIGNED INT 
 			break;
 		case 20: //get IQ
-			 bytes2Float(&a, &this->motors[i].iq_setpoint );  //FLOAT 
-			 bytes2Float(&e, &this->motors[i].iq_measured );  //FLOAT 
+			 bytes2Float(&rx_msg.cframe.data[0], &this->motors[i].iq_setpoint );  //FLOAT 
+			 bytes2Float(&rx_msg.cframe.data[4], &this->motors[i].iq_measured );  //FLOAT 
 			break;
 		case 23://vbus voltage
-			 bytes2Float(&a, &this->motors[i].vbus_voltage);  //FLOAT 
-			 printf("vbus voltage = %f\n",motors[i].vbus_voltage);
+
+			 bytes2Float(&rx_msg.cframe.data[0], &motors[i].vbus_voltage);  //FLOAT 
+			 printf("vbus voltage = %f, breakdown: %x %x %x %x\n",motors[i].vbus_voltage, a,b,c,d);
 			break;
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;
