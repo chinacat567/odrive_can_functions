@@ -12,7 +12,7 @@ void bit_masking(can_frame_odrive &can_frame)
 }
 
 /*function for sorting CAN node ids into respective robot legs*/
-void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
+/*void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 {
 	
 	/*	routine for allotting can_node_id of ODrive. Motors are numbered from 1-13 in the following format
@@ -21,10 +21,10 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 	Leg 2 (Knee -7 Abduction -8 Hip -9)
 	Leg 3 (Knee -10 Abduction -11 Hip -12)*/
 
-	uint32_t part = msg.node_id%3;
+/*	uint32_t part = msg.node_id%3;
 	
 	switch (part){
-	case 1: /* knee motor */
+	case 1: // knee motor 
 		
 		for (int i = 1; i < 5; ++i)
 		{
@@ -38,7 +38,7 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 		}		
 		
 		break;
-	case 2: /* abduction motor */
+	case 2: // abduction motor 
 		
 			
 		for (int i = 1; i < 5; ++i)
@@ -53,7 +53,7 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 		}	
 		break;
 
-	case 0:  /* hip motor */
+	case 0:  // hip motor 
 		
 		for (int i = 1; i < 5; ++i)
 		{
@@ -72,7 +72,7 @@ void sort_can_node_id(odrive_motor (&legs)[4][3],can_frame_odrive &msg)
 		
 	}
 
-}
+}*/
 
 
 /*architecture dependent float to byte converter (Endian-ness)
@@ -93,10 +93,10 @@ void float2Bytes(float float_variable, uint8_t * bytes_temp){
     uint8_t bytes[4];
   } thing;
   //swap around for different endian
-  thing.bytes[0] = bytes_temp[3];
-  thing.bytes[1] = bytes_temp[2];
-  thing.bytes[2] = bytes_temp[1];
-  thing.bytes[3] = bytes_temp[0];
+  thing.bytes[0] = bytes_temp[0];
+  thing.bytes[1] = bytes_temp[1];
+  thing.bytes[2] = bytes_temp[2];
+  thing.bytes[3] = bytes_temp[3];
   *(float_variable) = thing.a;
 }
 

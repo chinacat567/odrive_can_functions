@@ -6,17 +6,19 @@ static void do_rt_task(struct threadArg *data)
 {
 	int nbytes;
 	static int i;
+  
 	controller *ctrT1=	data->ctrArg;
 	//do RT stuff here
 
 //use this if printing to 1 destination
 
-		printf("tread writing from socket %d to %x\n",data->socket, data->frame.can_id ); 
+		//printf("tread writing from socket %d to %x\n",data->socket, data->frame.can_id ); 
 		if (i ==0){
 			ctrT1->set_vel_limit(1,12345.0);
 			i=1;
 		}else{
-			ctrT1->set_vel_limit(1,54231.0);
+			ctrT1->set_vel_limit(1,54321.0);
+      ctrT1->get_vbus_voltage(1);
 			//ctrT1->set_axis_requested_state(1,5);
 			i=0;
 		}
@@ -50,29 +52,31 @@ void *thread_func(void *data)
 }
 
 static void do_rt_task2(struct threadArg *data){
-	struct can_frame frame;	
+	struct can_frame sframe;	
     static int i;
     int nbytes;	
 
-    (data->ctrArg)->can_read();
-    cout << "left the read command" << endl;
+    (data->ctrArg)->msg_handler();
+    
  
 	//do RT stuff here
-/* 	printf("tread 2 reading %d from %x\n",data->socket2,data->frame2.can_id);
-	nbytes=read(data->socket2, &(data->frame2), sizeof(struct can_frame));
-    	frame = data->frame2;
-    	printf("tread 2 can_id: %d\n",data->frame2.can_id);
-	if (data->frame2.can_id == 47)
-	printf("data read i:%d nbytes:%d %x %x %x %x %x %x %x %x. Yay!\n",i,nbytes,frame.data[0], frame.data[1], frame.data[2], frame.data[3],
-		 frame.data[4], frame.data[5], frame.data[6], frame.data[7]);	*/
-	
+ /*	printf("tread 2 reading %d\n",data->socket);
+	nbytes=read(data->socket, &(data->frame), sizeof(struct can_frame));
+    	sframe = data->frame;
+    	printf("tread 2 can_id: %x\n",sframe.can_id);
+	if (sframe.can_id != 41 | sframe.can_id != 21)
+	//printf("data read nbytes:%d %x %x %x %x %x %x %x %x. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
+	//	 sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]);	
+	printf("data read nbytes:%d %d %d %d %d %d %d %d %d. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
+     sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]); 
+ */ 
 }
 
 void *thread_func2(void *data)
 {
   struct period_info pinfo;
   struct threadArg * test = (struct threadArg *)data;
-  printf("passed in %d into thread2 at period %ld ",test->socket2,test->taskperiod);
+  printf("passed in %d into thread2 at period %ld ",test->socket,test->taskperiod);
   periodic_task_init(&pinfo,test->taskperiod);
   
 	while(1){

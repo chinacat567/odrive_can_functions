@@ -6,7 +6,7 @@
 
 /*CAN READ AND WRITE FUNCTIONS*/
 
-controller::controller(int socket_fd)
+controller::controller(int writesocket_fd,int readsocket_fd)
 {
 	
 	/*initialize rx and tx can messages structs*/
@@ -17,19 +17,26 @@ controller::controller(int socket_fd)
 	}
 	this->tx_msg.cframe.can_dlc = 8; 
 	this->rx_msg.cframe.can_dlc = 8; 
-	socket_file_handler = socket_fd;
-	
+	write_socket = writesocket_fd;
+	read_socket = readsocket_fd;
+	//printf("read socket: %d, write socket: %d\n",read_socket,write_socket );
 	this->signit_handler = true;
 }
 
 bool controller::can_read()
 {	
-	int nbytes;
-	nbytes = read(this->socket_file_handler, &this->rx_msg, sizeof(struct can_frame));
-
+	struct can_frame sframe;	
+  	int nbytes;
+	//printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
+	nbytes = read(read_socket, &(rx_msg.cframe), sizeof(struct can_frame));
+	sframe = rx_msg.cframe;
+    //printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
+	//printf("data read nbytes:%d %d %d %d %d %d %d %d %d. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
+    // sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]); 
+  
     /* paranoid check ... */
     if (nbytes < sizeof(struct can_frame)) {
-            fprintf(stderr, "read: incomplete CAN frame\n");
+            perror("read: incomplete CAN frame\n");
             return 1;
     }
 	
@@ -38,9 +45,9 @@ bool controller::can_read()
 bool controller::can_write()
 {	
 	int nbytes;
-	printf("can_write %d:",socket_file_handler);
+	printf("can_write %d:",write_socket);
 	
-	nbytes = write(this->socket_file_handler, &(tx_msg.cframe), sizeof(struct can_frame));
+	nbytes = write(this->write_socket, &(tx_msg.cframe), sizeof(struct can_frame));
 	if (nbytes < 0) {
             perror("can raw socket write");
             return 1;
@@ -61,6 +68,9 @@ void controller::msg_handler()
 	uint8_t a,b,c,d,e,f,g,h; /*temp storage variale for the CAN data packets*/
 	int i;
 
+
+	can_read();
+	bit_masking(rx_msg);
 	a = this->rx_msg.cframe.data[0];
 	b = this->rx_msg.cframe.data[1];
 	c = this->rx_msg.cframe.data[2];
@@ -72,7 +82,7 @@ void controller::msg_handler()
 	h = this->rx_msg.cframe.data[7];
 
 	/*read the received can frame*/
-
+	printf("node: %x cmd:%d\n", rx_msg.node_id,rx_msg.cmd_id);
 	i = rx_msg.node_id;
 	switch(this->rx_msg.cmd_id)
 	{
@@ -100,6 +110,7 @@ void controller::msg_handler()
 			break;
 		case 23://vbus voltage
 			 bytes2Float(&a, &this->motors[i].vbus_voltage);  //FLOAT 
+			 printf("vbus voltage = %f\n",motors[i].vbus_voltage);
 			break;
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;
@@ -267,7 +278,7 @@ void controller::set_vel_limit(uint32_t node_id, float vel_limit)  /*FLOAT*/
 	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 		
 	float2Bytes(vel_limit, tx_msg.cframe.data);
-	printf("inside class to %x of size %d of socket %d:cframe.data is %x %x %x %x\n", tx_msg.cframe.can_id, tx_msg.cframe.can_dlc, socket_file_handler, tx_msg.cframe.data[0], tx_msg.cframe.data[1], tx_msg.cframe.data[2],tx_msg.cframe.data[3]);
+	//printf("inside class to %x of size %d of socket %d:cframe.data is %x %x %x %x\n", tx_msg.cframe.can_id, tx_msg.cframe.can_dlc, write_socket, tx_msg.cframe.data[0], tx_msg.cframe.data[1], tx_msg.cframe.data[2],tx_msg.cframe.data[3]);
   	can_write();
 }
 void controller::start_anticogging(uint32_t node_id)
@@ -332,7 +343,7 @@ void controller::get_vbus_voltage(uint32_t node_id)
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = GET_VBUS_VOLTAGE;
-	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5| RTR<<30);
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5| CAN_RTR_FLAG);
 		
 	can_write();	
 }

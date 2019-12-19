@@ -99,7 +99,7 @@ struct odrive_motor
     float iq_measured;
     float sensorless_pos_estimate;
     float sensorless_vel_estimate;
-    float vbus_voltage; 
+    float vbus_voltage = 0.0; 
     float velocity_p_gain; 
     float velocity_i_gain; 
 };
@@ -117,7 +117,7 @@ class controller{
 
 public:
     /*constructor*/
-    controller(int socket_fd);
+    controller(int writesocket_fd,int readsocket_f);
 
     virtual ~controller() {};
     
@@ -154,12 +154,12 @@ public:
     void set_internal_thread(pthread_t &thread);
     /*returns true is the thread was started successfully, false in case of errors*/
     bool start_internal_thread();
-    
 
 private:
     can_frame_odrive rx_msg;
     can_frame_odrive tx_msg;
-    int socket_file_handler;
+    int read_socket;
+    int write_socket;
     pthread_t thread;
    /*'legs' member variable, contains motor data for all the 12 motors*/
     odrive_motor motors[NO_OF_MOTOR];
