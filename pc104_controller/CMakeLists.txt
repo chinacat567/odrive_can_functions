@@ -8,6 +8,7 @@ add_library(controller_lib
 		src/misc_functions.cpp
 		src/odrive_can_functions.cpp
  		src/periodic_task.cpp
+ 		src/request_msg.cpp
 )
 
 add_definitions(-std=c++17)

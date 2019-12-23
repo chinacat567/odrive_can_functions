@@ -1,33 +1,41 @@
-#include<controller.hpp>
+#include "controller.hpp"
 
 int main()
 {
   //pthread_attr_t attr;
   pthread_t thread,thread2; 
   int ret,i;
-  struct threadArg canArg1,canArg4;
+  struct threadArg canArg1,canArg2;
 
-  can_init(canArg1,canArg4);
-
-  controller ctr1(canArg1.socket);
+  can_init(canArg1,canArg2);
+  
+  controller ctr1(canArg1.socket,canArg2.socket);
   canArg1.ctrArg = &ctr1;
+  canArg2.ctrArg = &ctr1;
 
   /* Lock memory */
   if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
     printf("mlockall failed: %m\n");
     exit(-2);
   }
-											
-  set_periodic_task(&ctr1, &thread2, &canArg1, 2, 200000,82);
-  set_periodic_task(&ctr1, &thread, &canArg1, 1, 200000	,81);
-
 /*
-  for (i=0; i<10;i++){
- 		ctr1.set_vel_limit(1,12345.0);
- 		ctr1.move_to_pos(1,12345);
- 			
+//for debugging 
+  float f;
   
-  }*/
+  struct d{
+  	float g;
+  };
+  struct d e[2];
+
+  uint8_t c[4]={0x88,0xe3,0xb0,0x41};
+
+  bytes2Float(&c[0],&e[1].g);	
+  printf("float f is %f",e[1].g);			
+*/
+
+  set_periodic_task(&ctr1, &thread2, &canArg2, 2, 10000000,80);//read
+  set_periodic_task(&ctr1, &thread, &canArg1, 1, 20000000,81);//write
+
 
  //ctr1.set_axis_requested_state(1,5);
 
@@ -44,7 +52,7 @@ if (ret)
 
 
 
-int can_init(struct threadArg &canArg1,struct threadArg &canArg4)
+int can_init(struct threadArg &canArg1,struct threadArg &canArg2)
 //this function initializes the the CAN sockets and frames 
 //Some dummy values were included for easy testing
 
@@ -152,10 +160,10 @@ int can_init(struct threadArg &canArg1,struct threadArg &canArg4)
 
 	canArg1.socket= s;
 	canArg1.frame= frame;
-	canArg1.socket2= s2;
-	canArg1.frame2= frame2;
-	canArg4.socket= s3;
-	canArg4.frame= frame4;
-	//canArg4->frame2= frame2;
+	//canArg1.socket2= s2;
+	//canArg1.frame2= frame2;
+	canArg2.socket= s2;
+	canArg2.frame= frame2;
+	//canArg2->frame2= frame2;
 	return 0;
 }

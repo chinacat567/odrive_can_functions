@@ -22,11 +22,14 @@
 
 struct threadArg { 
 
-	//for grabbing up to 2 socket info.
+	//for main functions
 	long int taskperiod;
-	struct can_frame frame,frame2;
-	int socket,socket2;
 	controller* ctrArg;
+	
+	//for debugging purposes
+	struct can_frame frame;
+	int socket;
+	
 };
 
 struct period_info {

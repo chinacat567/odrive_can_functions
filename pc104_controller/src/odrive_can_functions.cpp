@@ -6,30 +6,37 @@
 
 /*CAN READ AND WRITE FUNCTIONS*/
 
-controller::controller(int socket_fd)
+controller::controller(int writesocket_fd,int readsocket_fd)
 {
 	
 	/*initialize rx and tx can messages structs*/
 	for (int i = 0; i < 7; ++i)
-	{
+	{	
 		this->tx_msg.cframe.data[i] = 0;
 		this->rx_msg.cframe.data[i] = 0;
 	}
 	this->tx_msg.cframe.can_dlc = 8; 
 	this->rx_msg.cframe.can_dlc = 8; 
-	socket_file_handler = socket_fd;
-	
+	write_socket = writesocket_fd;
+	read_socket = readsocket_fd;
+	//printf("read socket: %d, write socket: %d\n",read_socket,write_socket );
 	this->signit_handler = true;
 }
 
 bool controller::can_read()
 {	
-	int nbytes;
-	nbytes = read(this->socket_file_handler, &this->rx_msg, sizeof(struct can_frame));
-
+	struct can_frame sframe;	
+  	int nbytes;
+	//printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
+	nbytes = read(read_socket, &(rx_msg.cframe), sizeof(struct can_frame));
+	sframe = rx_msg.cframe;
+    //printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
+	//printf("data read nbytes:%d %d %d %d %d %d %d %d %d. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
+    // sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]); 
+  
     /* paranoid check ... */
     if (nbytes < sizeof(struct can_frame)) {
-            fprintf(stderr, "read: incomplete CAN frame\n");
+            perror("read: incomplete CAN frame\n");
             return 1;
     }
 	
@@ -38,9 +45,9 @@ bool controller::can_read()
 bool controller::can_write()
 {	
 	int nbytes;
-	printf("can_write %d:",socket_file_handler);
+	printf("can_write %d:",write_socket);
 	
-	nbytes = write(this->socket_file_handler, &(tx_msg.cframe), sizeof(struct can_frame));
+	nbytes = write(this->write_socket, &(tx_msg.cframe), sizeof(struct can_frame));
 	if (nbytes < 0) {
             perror("can raw socket write");
             return 1;
@@ -58,16 +65,13 @@ bool controller::can_write()
 
 void controller::msg_handler()
 {
+	uint8_t a,b,c,d,e,f,g,h; //temp storage variale for the CAN data packets
+	int i;
 
-	bit_masking(this->rx_msg); /*get node id, cmd id*/
-	sort_can_node_id(this->legs,this->rx_msg); /*assign node id to respective leg*/
-	uint8_t a,b,c,d,e,f,g,h; /*temp storage variale for the CAN data packets*/
-	int leg_no, type_no; /*temp storage variables for leg_no and type_no*/
+	can_read();
+	bit_masking(rx_msg);
 
-	leg_no = this->rx_msg.idn.leg_no;
-	type_no = this->rx_msg.idn.type_no;
-
-	a = this->rx_msg.cframe.data[0];
+	a = this->rx_msg.cframe.data[0];	
 	b = this->rx_msg.cframe.data[1];
 	c = this->rx_msg.cframe.data[2];
 	d = this->rx_msg.cframe.data[3];
@@ -77,33 +81,39 @@ void controller::msg_handler()
 	g = this->rx_msg.cframe.data[6];
 	h = this->rx_msg.cframe.data[7];
 
+
+
 	/*read the received can frame*/
+	printf("node: %x cmd:%d\n", rx_msg.node_id,rx_msg.cmd_id);
+	i = rx_msg.node_id;
 	switch(this->rx_msg.cmd_id)
 	{
-		case '1': /*hearbeat message*/
-			this->legs[leg_no][type_no].axis_error = (a | b << 8 | c << 16 | d << 24);
-			this->legs[leg_no][type_no].axis_current_state = (e | f << 8 | g << 16 | h << 24);
+		case 1: //hearbeat message
+			this->motors[i].axis_error = (a | b << 8 | c << 16 | d << 24);
+			this->motors[i].axis_current_state = (e | f << 8 | g << 16 | h << 24);
 			break;
-		case '3': /*get motor error*/
-			this->legs[leg_no][type_no].motor_error = (a | b << 8 | c << 16 | d << 24);
+		case 2: //get motor error//
+			this->motors[i].motor_error = (a | b << 8 | c << 16 | d << 24);
 			break;
-		case '4': /*get encoder error*/
-			this->legs[leg_no][type_no].encoder_error = (e | f << 8 | g << 16 | h << 24);;
+		case 4: //get encoder error
+			this->motors[i].encoder_error = (e | f << 8 | g << 16 | h << 24);;
 			break;
-		case '9': /*get encoder estimates*/
-			bytes2Float(&a, &this->legs[leg_no][type_no].encoder_pos_estimate);/*FLOAT*/
-			bytes2Float(&e, &this->legs[leg_no][type_no].encoder_vel_estimate ); /*FLOAT*/
+		case 9: //get encoder estimates
+			bytes2Float(&rx_msg.cframe.data[0], &this->motors[i].encoder_pos_estimate); //FLOAT 
+			bytes2Float(&rx_msg.cframe.data[4], &this->motors[i].encoder_vel_estimate );  //FLOAT 
 			break;
-		case '10': /*get encoder counts*/
-			this->legs[leg_no][type_no].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24); /*SIGNED INT*/
-			this->legs[leg_no][type_no].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24); /*SIGNED INT*/
+		case 10: //get encoder counts
+			this->motors[i].encoder_shadow_count = (a | b << 8 | c << 16 | d << 24);  //SIGNED INT 
+			this->motors[i].encoder_count_in_cpr =(e | f << 8 | g << 16 | h << 24);  //SIGNED INT 
 			break;
-		case '20': /*get IQ*/
-			 bytes2Float(&a, &this->legs[leg_no][type_no].iq_setpoint ); /*FLOAT*/
-			 bytes2Float(&e, &this->legs[leg_no][type_no].iq_measured ); /*FLOAT*/
+		case 20: //get IQ
+			 bytes2Float(&rx_msg.cframe.data[0], &this->motors[i].iq_setpoint );  //FLOAT 
+			 bytes2Float(&rx_msg.cframe.data[4], &this->motors[i].iq_measured );  //FLOAT 
 			break;
-		case '23':/*vbus voltage*/
-			 bytes2Float(&a, &this->legs[leg_no][type_no].vbus_voltage); /*FLOAT*/
+		case 23://vbus voltage
+
+			 bytes2Float(&rx_msg.cframe.data[0], &motors[i].vbus_voltage);  //FLOAT 
+			 printf("vbus voltage = %f, breakdown: %x %x %x %x\n",motors[i].vbus_voltage, a,b,c,d);
 			break;
 		default:
 			cout << "Failed to read incoming CAN frame" << endl;
@@ -151,13 +161,13 @@ void * controller::InternalThreadEntryFunc(void * This)
 
 }
 
-odrive_motor controller::get_motor_data(int x, int y)
+odrive_motor controller::get_motor_data(int x)
  {
- 	if( x<0 || x>3 || y<0 || y>2)
+ 	if( x<0 || x>12 )
  	{
  		cout << " Invalid access" << endl ;
  	}
- 	return this->legs[x][y];
+ 	return this->motors[x];
  }
 
 
@@ -271,7 +281,7 @@ void controller::set_vel_limit(uint32_t node_id, float vel_limit)  /*FLOAT*/
 	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
 		
 	float2Bytes(vel_limit, tx_msg.cframe.data);
-	printf("inside class to %x of size %d of socket %d:cframe.data is %x %x %x %x\n", tx_msg.cframe.can_id, tx_msg.cframe.can_dlc, socket_file_handler, tx_msg.cframe.data[0], tx_msg.cframe.data[1], tx_msg.cframe.data[2],tx_msg.cframe.data[3]);
+	//printf("inside class to %x of size %d of socket %d:cframe.data is %x %x %x %x\n", tx_msg.cframe.can_id, tx_msg.cframe.can_dlc, write_socket, tx_msg.cframe.data[0], tx_msg.cframe.data[1], tx_msg.cframe.data[2],tx_msg.cframe.data[3]);
   	can_write();
 }
 void controller::start_anticogging(uint32_t node_id)
@@ -336,7 +346,7 @@ void controller::get_vbus_voltage(uint32_t node_id)
 	
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = GET_VBUS_VOLTAGE;
-	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
+	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5| CAN_RTR_FLAG);
 		
 	can_write();	
 }
