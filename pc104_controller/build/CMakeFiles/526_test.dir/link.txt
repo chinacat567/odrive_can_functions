@@ -1,0 +1,1 @@
+/usr/bin/c++  -g  -rdynamic CMakeFiles/526_test.dir/src/526_test.cpp.o  -o 526_test libcontroller_lib.a -lcomedi 

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/codecraft94/Documents/nus_quadruped/pc104_controller/src/526_test.cpp
+stdio.h
+-
+stdlib.h
+-
+comedilib.h
+-
+ctype.h
+-
+math.h
+-
+
