@@ -1,4 +1,0 @@
-/home/codecraft94/Documents/nus_quadruped/pc104_controller/build/CMakeFiles/rebuild_cache.dir
-/home/codecraft94/Documents/nus_quadruped/pc104_controller/build/CMakeFiles/edit_cache.dir
-/home/codecraft94/Documents/nus_quadruped/pc104_controller/build/CMakeFiles/controller_lib.dir
-/home/codecraft94/Documents/nus_quadruped/pc104_controller/build/CMakeFiles/quadruped_controller.dir

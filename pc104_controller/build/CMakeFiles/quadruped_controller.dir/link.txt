@@ -1,1 +1,0 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/quadruped_controller.dir/src/main.cpp.o  -o quadruped_controller libcontroller_lib.a -lpthread -lcomedi 
