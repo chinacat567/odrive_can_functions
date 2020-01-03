@@ -1,4 +1,5 @@
 #include<linux/can.h>
+#include<linux/can/raw.h>
 #include<sys/socket.h>
  #include <unistd.h>
 #include<sys/types.h>
@@ -13,6 +14,8 @@
 
 #define RTR 1
 
+#define RTR_MASK 0X40000000
+
 #define BIT_MASK_0 0xFF
 #define BIT_MASK_1 0xFF00
 #define BIT_MASK_2 0xFF0000
@@ -24,8 +27,7 @@
 
 using namespace std;
 
-// define motor array index
-#define NO_OF_MOTOR       12
+
 
 #define FRONT_LEFT_KNEE       1
 #define FRONT_LEFT_HIP        2
@@ -147,28 +149,16 @@ public:
 
 
     /* accessor methods : used for accessing private class members from outside the class*/
-    odrive_motor get_motor_data(int x);
-
-    /*MULTITHREADING FUNCTIONS*/
-    void set_mutex_lock(pthread_mutex_t &lock);
-    void set_internal_thread(pthread_t &thread);
-    /*returns true is the thread was started successfully, false in case of errors*/
-    bool start_internal_thread();
+    odrive_motor* get_motor_data(int x);
 
 private:
     can_frame_odrive rx_msg;
     can_frame_odrive tx_msg;
     int read_socket;
     int write_socket;
-    pthread_t thread;
    /*'legs' member variable, contains motor data for all the 12 motors*/
-    odrive_motor motors[NO_OF_MOTOR+1];
-    bool signit_handler;
-    pthread_mutex_t mutex_lock;
-    /* thread function that runs an infinite loop*/
-    void* internal_thread_function();
-    static void * InternalThreadEntryFunc(void * This);
-    
+    odrive_motor motors[MOTOR_COUNT];
+
 };
 
 

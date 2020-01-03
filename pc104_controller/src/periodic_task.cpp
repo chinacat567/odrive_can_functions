@@ -90,12 +90,14 @@ void *thread_func2(void *data)
 
 void set_periodic_task(struct controller* ctrl_handler, pthread_t* thread_handler, threadArg* thread_arg, int function_number, long int period = 100000000, int priority=80){
 
-//note: threads are declared in main and passed into function
-//		intentionally to ensure developer are aware fo the number of thread
-//		being created	
+/*note: threads are declared in main and passed into function
+		intentionally to ensure developer are aware fo the number of thread
+		being created	
 
-//arg: priority (set to between 20-80) (critical system priority is 99 [DO NOT USE], normal task have priority of -1) 
-//arg: note, don't attempt to give 2 different period to 1 single threadArg. doesn't work, will always take from higher prioritiy( suspect: due to some interupt sequenceing?)
+arg: priority (set to between 20-80) (critical system priority is 99 [DO NOT USE], normal task have priority of -1) 
+arg: note, don't attempt to give 2 different period to 1 single threadArg. doesn't work, will always take from higher prioritiy( suspect: due to some interupt sequenceing?)
+*/  
+
   struct sched_param param;
   pthread_attr_t attr;
 
@@ -136,9 +138,8 @@ void set_periodic_task(struct controller* ctrl_handler, pthread_t* thread_handle
   }
 
  /* Create a pthread with specified attributes */
-// thread(1) to write data
 
-if (function_number == 1 ){
+
 ret = pthread_create(thread_handler, &attr, thread_func, thread_arg);
   if (ret) {
     printf("create pthread 1 failed\n");
@@ -146,18 +147,7 @@ ret = pthread_create(thread_handler, &attr, thread_func, thread_arg);
   }
 
   printf("create pthread 1 success\n");
-}
 
-//thread2 to continuously read
-if (function_number == 2 ){
-ret = pthread_create(thread_handler, &attr, thread_func2, thread_arg);
-  if (ret) {
-    printf("create pthread 2 failed\n");
-    
-  }
-
-  printf("create pthread 2 success\n");
-}
 
 }
 

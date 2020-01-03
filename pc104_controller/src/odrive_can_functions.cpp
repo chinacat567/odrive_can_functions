@@ -17,10 +17,9 @@ controller::controller(int writesocket_fd,int readsocket_fd)
 	}
 	this->tx_msg.cframe.can_dlc = 8; 
 	this->rx_msg.cframe.can_dlc = 8; 
-	write_socket = writesocket_fd;
-	read_socket = readsocket_fd;
-	//printf("read socket: %d, write socket: %d\n",read_socket,write_socket );
-	this->signit_handler = true;
+	this->write_socket = writesocket_fd;
+	this->read_socket = readsocket_fd;
+	printf("read socket: %d, write socket: %d\n",read_socket,write_socket );
 }
 
 bool controller::can_read()
@@ -28,36 +27,50 @@ bool controller::can_read()
 	struct can_frame sframe;	
   	int nbytes;
 	//printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
-	nbytes = read(read_socket, &(rx_msg.cframe), sizeof(struct can_frame));
+	nbytes = read(read_socket, &(rx_msg.cframe), N_READ*sizeof(can_frame));
 	sframe = rx_msg.cframe;
-    //printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
-	//printf("data read nbytes:%d %d %d %d %d %d %d %d %d. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
-    // sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]); 
+    printf("tread 2 socket: %d can_id: %x\n",read_socket,sframe.can_id);	
+	printf("data read nbytes:%d %d %d %d %d %d %d %d %d. Yay!\n",nbytes,sframe.data[0], sframe.data[1], sframe.data[2], sframe.data[3],
+    sframe.data[4], sframe.data[5], sframe.data[6], sframe.data[7]); 
+
+    if (nbytes < 0) {
+            perror("can raw socket write");
+            return 0;
+    }
   
     /* paranoid check ... */
-    if (nbytes < sizeof(struct can_frame)) {
+    if (nbytes < N_READ * sizeof(can_frame)) {
             perror("read: incomplete CAN frame\n");
-            return 1;
+            return 0;
     }
-	
+    else if (nbytes > N_READ * sizeof(can_frame)) {
+            perror("read failed\n");
+            return 0;
+    }
+    return 1;
+    	
 }
 
 bool controller::can_write()
 {	
 	int nbytes;
-	printf("can_write %d:",write_socket);
 	
-	nbytes = write(this->write_socket, &(tx_msg.cframe), sizeof(struct can_frame));
+	nbytes = write(this->write_socket, &(tx_msg.cframe), N_WRITE * sizeof(can_frame));
 	if (nbytes < 0) {
             perror("can raw socket write");
-            return 1;
+            return 0;
     }
 
     /* paranoid check ... */
-    if (nbytes < sizeof(struct can_frame)) {
+    if (nbytes < N_WRITE * sizeof(can_frame)) {
             perror("write: incomplete CAN frame\n");
             return 1;
     }
+    else if (nbytes < N_WRITE * sizeof(can_frame)) {
+            perror("write: incomplete CAN frame\n");
+            return 1;
+    }
+    return 1;
 
 }
 
@@ -113,10 +126,7 @@ void controller::msg_handler()
 		case 23://vbus voltage
 
 			 bytes2Float(&rx_msg.cframe.data[0], &motors[i].vbus_voltage);  //FLOAT 
-			 printf("vbus voltage = %f, breakdown: %x %x %x %x\n",motors[i].vbus_voltage, a,b,c,d);
 			break;
-		default:
-			cout << "Failed to read incoming CAN frame" << endl;
 
 	}
 
@@ -124,50 +134,14 @@ void controller::msg_handler()
 
 }	
 
-
-/*PTHREAD RELATED FUNCTIONS*/
-
-void* controller::internal_thread_function()
-{
-	while(signit_handler)
-	{
-		pthread_mutex_lock(&this->mutex_lock);
-		this->can_read();
-		this->msg_handler();
-		pthread_mutex_unlock(&this->mutex_lock);
-
-	}
-
-}
-	
-void controller::set_internal_thread(pthread_t &thread)
-{
-	this->thread = thread;
-}
-
-bool controller::start_internal_thread()
-{
-	return (pthread_create(&this->thread, NULL, InternalThreadEntryFunc, NULL) == 0); /*complete this later on*/
-}
-void controller::set_mutex_lock(pthread_mutex_t &lock)
-{
-	this->mutex_lock = lock;
-}
-
-void * controller::InternalThreadEntryFunc(void * This)
-{
-	((controller *)This)->internal_thread_function();
-	return NULL;
-
-}
-
-odrive_motor controller::get_motor_data(int x)
+odrive_motor* controller::get_motor_data(int x)
  {
- 	if( x<0 || x>12 )
+ 	if( x < 0 || x > MOTOR_COUNT - 1 )
  	{
- 		cout << " Invalid access" << endl ;
+ 		cout << " Invalid access" << endl;
+ 		return NULL;
  	}
- 	return this->motors[x];
+ 	return &this->motors[x];
  }
 
 
@@ -341,15 +315,7 @@ void controller::reboot_odrive(uint32_t node_id)
 	can_write();	
 }
 
-void controller::get_vbus_voltage(uint32_t node_id)
-{
-	
-	this->tx_msg.node_id = node_id;
-	this->tx_msg.cmd_id = GET_VBUS_VOLTAGE;
-	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5| CAN_RTR_FLAG);
-		
-	can_write();	
-}
+
 void controller::set_vel_pi_gain(uint32_t node_id, float vel_p_gain, float vel_i_gain)  /*FLOAT*/
 {
 	

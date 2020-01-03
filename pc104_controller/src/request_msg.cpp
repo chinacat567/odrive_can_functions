@@ -1,34 +1,10 @@
 #include"request_msg.hpp"
 
-
-
-/*bool request_msg::start_internal_thread()
-{
-	return (pthread_create(&this->thread, NULL, &internal_thread_function, NULL) == 0);
-}
-*/
-
 request_msg::request_msg()
 {
 	this->write_msg.cframe.can_dlc = 8;
 
 }
-
-/*void* request_msg::internal_thread_function()
-{
-	while(signit_handler)
-	{
-		for (int i = 1; i < 13; ++i)
-		{
-			this->get_motor_error(i);
-			this->get_encoder_error(i);
-			this->get_encoder_estimate(i);
-			this->get_encoder_counts(i);
-			this->get_iq_values(i);
-			this->get_vbus_voltage(i);
-		}
-	}
-}*/
 
 void request_msg::get_motor_error(uint32_t node_id)
 {
@@ -86,15 +62,19 @@ int request_msg::send_msg()
 
 	if (nbytes < 0) {
             perror("can raw socket write");
-            return 1;
+            return 0;
     }
 
     /* paranoid check ... */
     if (nbytes < sizeof(struct can_frame)) {
             perror("write: incomplete CAN frame\n");
-            return 1;
+            return 0;
     }
-	
+    else if (nbytes > sizeof(struct can_frame)) {
+            perror("write failed\n");
+            return 0;
+    }
+    return 1;
 
 }
 
