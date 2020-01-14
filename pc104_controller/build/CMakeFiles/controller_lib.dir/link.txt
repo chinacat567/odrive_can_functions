@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcontroller_lib.a  CMakeFiles/controller_lib.dir/src/misc_functions.cpp.o CMakeFiles/controller_lib.dir/src/odrive_can_functions.cpp.o CMakeFiles/controller_lib.dir/src/task.cpp.o CMakeFiles/controller_lib.dir/src/request_msg.cpp.o CMakeFiles/controller_lib.dir/src/signal_generator.cpp.o
+/usr/bin/ranlib libcontroller_lib.a

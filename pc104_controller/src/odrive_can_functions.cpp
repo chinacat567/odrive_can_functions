@@ -201,7 +201,7 @@ void controller::move_to_pos(uint32_t node_id, int32_t pos)
 	can_write();
 }
 
-void controller::set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, int16_t vel_ff,int16_t current_ff)
+void controller::set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, float vel_ff,float current_ff)
 {
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = SET_POS_SETPOINT;
@@ -211,39 +211,39 @@ void controller::set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, int16_
 	this->tx_msg.cframe.data[2] = (pos_setpoint & BIT_MASK_2) >> 16;
 	this->tx_msg.cframe.data[3] = (pos_setpoint & BIT_MASK_3) >> 24;	
 
-	this->tx_msg.cframe.data[4] = ((vel_ff*10) & BIT_MASK_0);	
-	this->tx_msg.cframe.data[5] = ((vel_ff*10) & BIT_MASK_1) >> 8;	
+	this->tx_msg.cframe.data[4] = (int32_t(vel_ff*10) & BIT_MASK_0);	
+	this->tx_msg.cframe.data[5] = (int32_t(vel_ff*10) & BIT_MASK_1) >> 8;	
 	
-	this->tx_msg.cframe.data[6] = ((current_ff*100) & BIT_MASK_0);	
-	this->tx_msg.cframe.data[7] = ((current_ff*100) & BIT_MASK_1) >> 8;	
+	this->tx_msg.cframe.data[6] = (int16_t(current_ff*100) & BIT_MASK_0);	
+	this->tx_msg.cframe.data[7] = (int16_t(current_ff*100) & BIT_MASK_1) >> 8;	
 	can_write();
 	
 }
 
-void controller::set_vel_setpoint(uint32_t node_id, int32_t vel_setpoint , int16_t current_ff)
+void controller::set_vel_setpoint(uint32_t node_id, float vel_setpoint , float current_ff)
 {
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = SET_VEL_SETPOINT;
 	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.cframe.data[0] = ((vel_setpoint*100) & BIT_MASK_0);
-	this->tx_msg.cframe.data[1] = ((vel_setpoint*100) & BIT_MASK_1) >> 8;
-	this->tx_msg.cframe.data[2] = ((vel_setpoint*100) & BIT_MASK_2) >> 16;
-	this->tx_msg.cframe.data[3] = ((vel_setpoint*100) & BIT_MASK_3) >> 24;
+	this->tx_msg.cframe.data[0] = (int32_t(vel_setpoint*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[1] = (int32_t(vel_setpoint*100) & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = (int32_t(vel_setpoint*100) & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = (int32_t(vel_setpoint*100) & BIT_MASK_3) >> 24;
 
-	this->tx_msg.cframe.data[4] = ((current_ff*100) & BIT_MASK_0);
-	this->tx_msg.cframe.data[5] = ((current_ff*100) & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[4] = (int16_t(current_ff*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[5] = (int16_t(current_ff*100) & BIT_MASK_1) >> 8;
 	can_write();
 }
 
-void controller::set_cur_setpoint(uint32_t node_id, int32_t cur_setpoint)
+void controller::set_cur_setpoint(uint32_t node_id, float cur_setpoint)
 {
 	this->tx_msg.node_id = node_id;
 	this->tx_msg.cmd_id = SET_CUR_SETPOINT;
 	this->tx_msg.cframe.can_id = (this->tx_msg.cmd_id | this->tx_msg.node_id << 5);
-	this->tx_msg.cframe.data[0] = ((cur_setpoint*100) & BIT_MASK_0);
-	this->tx_msg.cframe.data[1] = ((cur_setpoint*100) & BIT_MASK_1) >> 8;
-	this->tx_msg.cframe.data[2] = ((cur_setpoint*100) & BIT_MASK_2) >> 16;
-	this->tx_msg.cframe.data[3] = ((cur_setpoint*100) & BIT_MASK_3) >> 24;
+	this->tx_msg.cframe.data[0] = (int32_t(cur_setpoint*100) & BIT_MASK_0);
+	this->tx_msg.cframe.data[1] = (int32_t(cur_setpoint*100) & BIT_MASK_1) >> 8;
+	this->tx_msg.cframe.data[2] = (int32_t(cur_setpoint*100) & BIT_MASK_2) >> 16;
+	this->tx_msg.cframe.data[3] = (int32_t(cur_setpoint*100) & BIT_MASK_3) >> 24;
 	can_write();	
 	
 }

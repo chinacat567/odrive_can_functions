@@ -78,7 +78,7 @@ void* rt_task_func_1(void * arg)
 		cout << "ADC READING " << adc_reading(device) << endl;
 		cout << "THETA_M " << THETA_M << endl;
 		cout << "THETA_R " << THETA_R << endl;
-		int32_t curr_setpoint = K_P * (THETA_R - THETA_M) + CURR_FF;
+		float curr_setpoint = K_P * (THETA_R - THETA_M) + CURR_FF;
 		cout << "Current setpoint =" <<   K_P * (THETA_R - THETA_M) << endl;
 		ctrl->set_cur_setpoint(i, curr_setpoint) ; 
 	}

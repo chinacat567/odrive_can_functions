@@ -14,7 +14,7 @@ add_library(controller_lib
 )
 
 add_definitions(-std=c++17)
-add_definitions(-DMOTOR_COUNT=1 -DN_READ=1 -DN_WRITE=1 -DANALOG_SCALE=200 -DRT_PERIOD_1=2000000 -DRT_PERIOD_2=1000000 -DSCHED_P_1=81 -DSCHED_P_2=80 -DK_P=0.004 -DCURR_FF=1.5)	
+add_definitions(-DMOTOR_COUNT=1 -DN_READ=1 -DN_WRITE=1 -DANALOG_SCALE=200 -DRT_PERIOD_1=2000000 -DRT_PERIOD_2=1000000 -DSCHED_P_1=81 -DSCHED_P_2=80 -DK_P=0.00045 -DCURR_FF=0)	
 
 add_executable(quadruped_controller src/main.cpp)
 add_dependencies(quadruped_controller controller_lib)

@@ -2,5 +2,9 @@
     "terminal.integrated.env.linux": {
         "PATH": "/home/codecraft94/.platformio/penv/bin:/home/codecraft94/.platformio/penv:/home/codecraft94/.local/bin:/home/codecraft94/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
         "PLATFORMIO_CALLER": "vscode"
+    },
+    "files.associations": {
+        "array": "cpp",
+        "string": "cpp"
     }
 }

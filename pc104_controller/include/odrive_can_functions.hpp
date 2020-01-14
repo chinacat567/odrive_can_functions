@@ -135,9 +135,9 @@ public:
     void set_axis_node_id(uint32_t node_id, uint16_t axis_can_node_id);
     void set_axis_requested_state(uint32_t node_id, uint32_t axis_requested_state);
     void move_to_pos(uint32_t node_id, int32_t pos);
-    void set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, int16_t vel_ff,int16_t current_ff);
-    void set_vel_setpoint(uint32_t node_id, int32_t vel_setpoint , int16_t current_ff);
-    void set_cur_setpoint(uint32_t node_id, int32_t cur_setpoint);
+    void set_pos_setpoint(uint32_t node_id, int32_t pos_setpoint, float vel_ff,float current_ff);
+    void set_vel_setpoint(uint32_t node_id, float vel_setpoint , float current_ff);
+    void set_cur_setpoint(uint32_t node_id, float cur_setpoint);
     void set_vel_limit(uint32_t node_id, float vel_limit);
     void start_anticogging(uint32_t node_id);
     void set_traj_vel_limit(uint32_t node_id, float traj_vel_limit);
